@@ -1,0 +1,6 @@
+*.a
+*.o
+*.lzma
+*.qcow2
+*.mem
+*.pyc
