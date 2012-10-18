@@ -4,7 +4,7 @@ from django.db import models
 from uuid import uuid4
 from tempfile import NamedTemporaryFile
 
-NFS_ROOT = "/tmp/"
+NFS_ROOT = "/mnt/"
 
 class Segment(models.Model):
     pub_date = models.DateTimeField(default=datetime.datetime.now)
@@ -24,7 +24,7 @@ class Stream(models.Model):
 
     segment = models.ForeignKey(Segment)
     pub_date = models.DateTimeField(default=datetime.datetime.now)
-    path = models.CharField(max_length=1024)
+    file_path = models.CharField(max_length=1024)
     container = models.CharField(max_length=100)
     tag = models.CharField(max_length = 1024)
     status = models.IntegerField()
@@ -34,7 +34,7 @@ class Stream(models.Model):
 
     def save(self, *args, **kwargs):
         tmp_path = NamedTemporaryFile(prefix="cloudlet-stream-", delete=False)
-        self.path = tmp_path.name
+        self.file_path = tmp_path.name
         if not self.status:
             self.status = Stream.STREAM_CREATED
 

@@ -19,23 +19,33 @@ class PrettyJSONSerializer(Serializer):
         return simplejson.dumps(data, cls=json.DjangoJSONEncoder,
                 sort_keys=True, ensure_ascii=False, indent=self.json_indent)
 
+
 class SegmentResource(ModelResource):
     class Meta:
+        serializer = PrettyJSONSerializer()
         authorization = Authorization()
         queryset = Segment.objects.all()
+        always_return_data = True
         resource_name = 'segment'
         list_allowed_methods = ['get', 'post']
+        excludes = ['pub_date', 'id']
+
 
 class StreamResource(ModelResource):
     segment = fields.ForeignKey(SegmentResource, 'segment')
 
     class Meta:
+        serializer = PrettyJSONSerializer()
         authorization = Authorization()
         queryset = Stream.objects.all()
+        always_return_data = True
         resource_name = 'stream'
         list_allowed_methods = ['get', 'post', 'put']
+        excludes = ['container', 'id', 'pub_date', 'pk']
 
+    '''
     def dehydrate(self, bundle):
         bundle.data['test'] = "test argument. TO BE DELETED"
         return bundle
+    '''
 
