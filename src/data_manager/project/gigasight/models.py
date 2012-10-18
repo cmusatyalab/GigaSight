@@ -1,8 +1,6 @@
 import datetime
 from django.contrib.auth.models import User
 from django.db import models
-from uuid import uuid4
-from tempfile import NamedTemporaryFile
 
 NFS_ROOT = "/mnt/"
 
@@ -33,8 +31,6 @@ class Stream(models.Model):
         return self.path
 
     def save(self, *args, **kwargs):
-        tmp_path = NamedTemporaryFile(prefix="cloudlet-stream-", delete=False)
-        self.file_path = tmp_path.name
         if not self.status:
             self.status = Stream.STREAM_CREATED
 

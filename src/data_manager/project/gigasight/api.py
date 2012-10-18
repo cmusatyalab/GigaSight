@@ -6,6 +6,7 @@ from tastypie.resources import ModelResource
 from tastypie import fields
 from gigasight.models import Segment
 from gigasight.models import Stream
+from tempfile import NamedTemporaryFile
 
 from django.core.serializers import json
 from django.utils import simplejson
@@ -42,6 +43,10 @@ class StreamResource(ModelResource):
         resource_name = 'stream'
         list_allowed_methods = ['get', 'post', 'put']
         excludes = ['container', 'id', 'pub_date', 'pk']
+        
+    def obj_create(self, bundle, request=None, **kwargs):
+        tmp_path = NamedTemporaryFile(prefix="stream-", delete=False)
+        return super(StreamResource, self).obj_create(bundle, request, file_path=tmp_path.name)
 
     '''
     def dehydrate(self, bundle):
