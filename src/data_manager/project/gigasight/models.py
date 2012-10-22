@@ -5,7 +5,8 @@ from django.db import models
 from uuid import uuid1
 
 class Segment(models.Model):
-    seg_id = models.CharField(max_length=36, primary_key=True, default=str(uuid1()))
+    seg_id = models.CharField(max_length=36, primary_key=True, default=lambda :str(uuid1()))
+    mod_time = models.DateTimeField(default=datetime.datetime.now)
     path = models.CharField(max_length=256)
     user_id = models.CharField(max_length=32)
     start_time = models.DateTimeField(default=datetime.datetime.now)
@@ -16,6 +17,7 @@ class Segment(models.Model):
         return self.seg_id
 
     def save(self, *args, **kwargs):
+        self.mod_time = datetime.datetime.now()
         return super(Segment, self).save(*args, **kwargs)
 
 
@@ -50,6 +52,7 @@ class Stream(models.Model):
     )
 
     segment = models.ForeignKey(Segment)
+    mod_time = models.DateTimeField(default=datetime.datetime.now)
     path = models.CharField(max_length=1024)
     stream_description = models.CharField(max_length=1024)
     status = models.CharField(max_length=3, choices=STREAM_STATUS)
@@ -61,13 +64,15 @@ class Stream(models.Model):
         if not self.status:
             self.status = 'CRE'
 
+        self.mod_time = datetime.datetime.now()
         return super(Stream, self).save(*args, **kwargs)
 
 
 class Tag(models.Model):
-    seg = models.ForeignKey(Segment)
-    offset = models.FloatField()
-    duration = models.FloatField()
+    segment = models.ForeignKey(Segment)
+    mod_time = models.DateTimeField(default=datetime.datetime.now)
+    offset = models.FloatField(default=0)
+    duration = models.FloatField(default=0)
     tag = models.CharField(max_length=32)
     tag_value = models.CharField(max_length=1024)
 
@@ -75,11 +80,9 @@ class Tag(models.Model):
         if not self.tag_value:
             return self.tag
         else:
-            return self.tag+' '+self.tag_value
+            return "%s %s" % (self.tag, self.tag_value)
 
     def save(self, *args, **kwargs):
-        return super(Stream, self).save(*args, **kwargs)
-
-
-
+        self.mod_time = datetime.datetime.now()
+        return super(Tag, self).save(*args, **kwargs)
 

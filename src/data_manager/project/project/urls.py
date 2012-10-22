@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from myapp.api import EntryResource, UserResource
-from gigasight.api import SegmentResource, StreamResource
+from gigasight.api import SegmentResource, StreamResource, TagResource
 from tastypie.api import Api
 
 
@@ -15,6 +15,7 @@ v1_api.register(EntryResource())
 dm = Api(api_name='dm')
 dm.register(SegmentResource())
 dm.register(StreamResource())
+dm.register(TagResource())
 
 urlpatterns = patterns('',
     # Examples:

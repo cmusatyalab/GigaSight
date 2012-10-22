@@ -7,6 +7,7 @@ from tastypie.resources import ModelResource
 from tastypie import fields
 from gigasight.models import Segment
 from gigasight.models import Stream
+from gigasight.models import Tag
 from tempfile import NamedTemporaryFile
 
 from django.core.serializers import json
@@ -33,7 +34,7 @@ class SegmentResource(ModelResource):
         always_return_data = True
         resource_name = 'segment'
         list_allowed_methods = ['get', 'post']
-        excludes = ['pub_date', 'id']
+        #excludes = ['seg_id']
 
 
 class StreamResource(ModelResource):
@@ -67,4 +68,17 @@ class StreamResource(ModelResource):
         bundle.data['test'] = "test argument. TO BE DELETED"
         return bundle
     '''
+
+class TagResource(ModelResource):
+    segment = fields.ForeignKey(SegmentResource, 'segment')
+
+    class Meta:
+        serializer = PrettyJSONSerializer()
+        authorization = Authorization()
+        queryset = Tag.objects.all()
+        always_return_data = True
+        resource_name = 'tag'
+        list_allowed_methods = ['get', 'post', 'put']
+        excludes = ['id', 'pk']
+
 
