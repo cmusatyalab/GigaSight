@@ -1,4 +1,5 @@
 # gigasight/api.py
+import os
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from django.contrib.auth.models import User
@@ -11,6 +12,9 @@ from tempfile import NamedTemporaryFile
 from django.core.serializers import json
 from django.utils import simplejson
 from tastypie.serializers import Serializer
+
+
+NFS_ROOT = "/mnt/segments/"
 
 class PrettyJSONSerializer(Serializer):
     json_indent = 2
@@ -42,11 +46,21 @@ class StreamResource(ModelResource):
         always_return_data = True
         resource_name = 'stream'
         list_allowed_methods = ['get', 'post', 'put']
-        excludes = ['container', 'id', 'pub_date', 'pk']
+        #excludes = ['container', 'id', 'pub_date', 'pk']
         
     def obj_create(self, bundle, request=None, **kwargs):
-        tmp_path = NamedTemporaryFile(prefix="stream-", delete=False)
-        return super(StreamResource, self).obj_create(bundle, request, file_path=tmp_path.name)
+        segment = bundle.data.get("segment", None)
+        if segment:
+            segment_id = [a.strip() for a in segment.split("/") if a != ''][-1]
+            stream_root = os.path.join(NFS_ROOT, segment_id)
+            if not os.path.exists(stream_root):
+                os.makedirs(stream_root)
+        else:
+            stream_root = os.path.join(NFS_ROOT)
+       
+        #import pdb; pdb.set_trace()
+        tmp_path = NamedTemporaryFile(prefix="stream-", delete=False, dir=stream_root)
+        return super(StreamResource, self).obj_create(bundle, request, path=tmp_path.name)
 
     '''
     def dehydrate(self, bundle):
