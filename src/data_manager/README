@@ -3,3 +3,7 @@ Copyright (C) 2011-2012 Carnegie Mellon University
 
 This is a developing project and some features might not be stable yet.
 Please visit our website at <http://elijah.cs.cmu.edu/>.
+
+INSTALL
+-------
+sudo apt-get install libmysqlclient-dev
