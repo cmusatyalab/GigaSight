@@ -3,7 +3,7 @@ from django.db import models
 
 class Cloudlet(models.Model):
     ipaddr = models.IPAddressField()
-    url_prefix = models.CharField()
+    url_prefix = models.CharField(max_length=100)
 
     def __unicode__(self):
         return self.ipaddr

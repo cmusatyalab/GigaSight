@@ -35,6 +35,7 @@ class SegmentResource(ModelResource):
     cloudlet = fields.ForeignKey(CloudletResource, 'cloudlet')
 
     class Meta:
+        filtering = { "tag_list":ALL, "user_id":('exact') }
         serializer = PrettyJSONSerializer()
         authorization = Authorization()
         queryset = Segment.objects.all()
