@@ -1,4 +1,4 @@
-from cookiegen.models import Segments
+from cookiegen.models import Segment
 
 # rendering
 from django.template import loader, RequestContext
