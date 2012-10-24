@@ -34,14 +34,14 @@ def search(request):
     for entry in entries:
         if entry_prev != None and entry.cloudlet != entry_prev.cloudlet:
             cookies.append(generate_cookie_django(urls,
-                                     servers=[Cloudlet.objects.get(pk=entry_prev.cloudlet).ipaddr]))
+                                     servers=[entry_prev.cloudlet.ipaddr]))
             urls = []
         urls.append('http://127.0.0.1:5873/mp4video/'+entry.seg_id)
         entry_prev = entry
     
     if entry_prev != None:
         cookies.append(generate_cookie_django(urls,
-                                 servers=[entry_prev.ip_addr]))
+                                 servers=[entry_prev.cloudlet.ipaddr]))
     
     cookie = ''.join(cookies) 
 
