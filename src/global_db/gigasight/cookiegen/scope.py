@@ -33,8 +33,6 @@ import binascii
 from datetime import datetime, timedelta
 import dateutil.parser
 from dateutil.tz import tzutc
-import sys
-sys.path.append('/usr/lib/python2.7/dist-packages')
 from M2Crypto import EVP, X509
 import os
 import re
