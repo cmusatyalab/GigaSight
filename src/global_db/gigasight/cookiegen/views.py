@@ -19,7 +19,7 @@ def search(request):
     req_location = request.GET['location']
     req_start_time = request.GET['start_time']
     req_end_time = request.GET['end_time']
-    entries = Segments.objects.order_by('ip_addr')
+    entries = Segment.objects.order_by('ip_addr')
     if req_location != '':
         entries = entries.filter(location__icontains=req_location)
     if req_start_time != '':

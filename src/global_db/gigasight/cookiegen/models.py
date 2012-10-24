@@ -11,6 +11,8 @@ class Cloudlet(models.Model):
     def save(self, *args, **kwargs):
         return super(Cloudlet, self).save(*args, **kwargs)
 
+    class Meta:
+        db_table = 'gigasight_global_cloudlet'
 
 class Segment(models.Model):
     seg_id = models.CharField(max_length=36, primary_key=True)
@@ -28,4 +30,7 @@ class Segment(models.Model):
     def save(self, *args, **kwargs):
          self.mod_time = datetime.datetime.now()
          return super(Segment, self).save(*args, **kwargs)
+
+    class Meta:
+        db_table = 'gigasight_global_segment'
 
