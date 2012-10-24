@@ -37,8 +37,10 @@ def get_files(cloudlet_url, resource_url=RESOURCE):
     data = conn.getresponse().read()
     response_list = json.loads(data).get('objects', list())
     stream_list = list()
+    import pprint
     for item in response_list:
-        stream_list.append(item.get("path"))
+        if item.get("segment").find("9464c492-1c7d-11e2-a6db-525400362bc6") != -1:
+            stream_list.append(item.get("path"))
 
     conn.close()
     return stream_list
