@@ -1,4 +1,4 @@
-from cookiegen.models import Segment
+from cookiegen.models import Segment, Cloudlet
 
 # rendering
 from django.template import loader, RequestContext
@@ -19,24 +19,24 @@ def search(request):
     req_location = request.GET['location']
     req_start_time = request.GET['start_time']
     req_end_time = request.GET['end_time']
-    entries = Segment.objects.order_by('ip_addr')
+    entries = Segment.objects.order_by('cloudlet')
     if req_location != '':
         entries = entries.filter(location__icontains=req_location)
     if req_start_time != '':
-        entries = entries.filter(time__gte=req_start_time)
+        entries = entries.filter(start_time__gte=req_start_time)
     if req_end_time != '':
-        entries = entries.filter(time__lte=req_end_time)
+        entries = entries.filter(start_time__lte=req_end_time)
     print entries
 
     cookies = []
     urls = []
     entry_prev = None
     for entry in entries:
-        if entry_prev != None and entry.ip_addr != entry_prev.ip_addr:
+        if entry_prev != None and entry.cloudlet != entry_prev.cloudlet:
             cookies.append(generate_cookie_django(urls,
-                                     servers=[entry_prev.ip_addr]))
+                                     servers=[Cloudlet.objects.get(pk=entry_prev.cloudlet).ipaddr]))
             urls = []
-        urls.append('http://127.0.0.1:5873/mp4video/'+entry.uuid)
+        urls.append('http://127.0.0.1:5873/mp4video/'+entry.seg_id)
         entry_prev = entry
     
     if entry_prev != None:
