@@ -15,6 +15,13 @@ def index(request):
     })
     return render_to_response('cookiegen/index.html', {}, RequestContext(request))
 
+def parse(url):
+    import socket
+    from urlparse import urlparse
+    o = urlparse(url)
+    hostname = o.hostname
+    return socket.gethostbyname(hostname)
+
 def search(request):    
     req_location = request.GET['location']
     req_start_time = request.GET['start_time']
@@ -33,15 +40,17 @@ def search(request):
     entry_prev = None
     for entry in entries:
         if entry_prev != None and entry.cloudlet != entry_prev.cloudlet:
+            ip_addr = parse(entry_prev.cloudlet.url_prefix)
             cookies.append(generate_cookie_django(urls,
-                                     servers=[entry_prev.cloudlet.ipaddr]))
+                                     servers=[ip_addr]))
             urls = []
         urls.append('http://127.0.0.1:5873/mp4video/'+entry.seg_id)
         entry_prev = entry
     
     if entry_prev != None:
+        ip_addr = parse(entry_prev.cloudlet.url_prefix)
         cookies.append(generate_cookie_django(urls,
-                                 servers=[entry_prev.cloudlet.ipaddr]))
+                                 servers=[ip_addr]))
     
     cookie = ''.join(cookies) 
 
@@ -49,6 +58,7 @@ def search(request):
         return HttpResponse(cookie, mimetype='application/x-diamond-scope')
     else:
         return render_to_response('cookiegen/index.html', 
-            {'entries':entries, 'is_search':True, 'req_location':req_location, 
-             'req_start_time':req_start_time, 'req_end_time':req_end_time}, RequestContext(request))
+            {'entries':entries, 'is_search':True, 
+             'req_location':req_location, 'req_start_time':req_start_time, 
+             'req_end_time':req_end_time, 'ip_addr':ip_addr}, RequestContext(request))
 

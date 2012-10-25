@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 #
 # Elijah: Cloudlet Infrastructure for Mobile Computing
 # Copyright (C) 2011-2012 Carnegie Mellon University
@@ -15,6 +15,7 @@
 # or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
 #
+
 from urlparse import urlparse
 import httplib
 import json
@@ -75,4 +76,5 @@ if __name__ == "__main__":
 
     import pprint
     pprint.pprint(stream_paths)
+    print stream_paths
 
