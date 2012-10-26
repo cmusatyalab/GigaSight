@@ -61,7 +61,7 @@ public class RESTClient {
 	}
 	
 	
-	private static HttpResponse doPost(ServerResource res, String url){
+	private static boolean doPost(ServerResource res, String url){
 		AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
 		try {
 			HttpPost request = new HttpPost(url);
@@ -86,13 +86,13 @@ public class RESTClient {
 					Log.d(TAG,"Location: "+location);
 				}
 			}
-			return response;
+			return true;
 			
 		} catch (IOException e) {
 			Message m = GigasightActivity.handler.obtainMessage(0,"Server problem: " + e.getMessage());
 			GigasightActivity.handler.sendMessage(m);			
 			e.printStackTrace();
-			return null;
+			return false;
 		} finally {
 			client.close();
 		}
@@ -124,7 +124,7 @@ public class RESTClient {
 		}
 	
 	}
-	private static class PostTask extends AsyncTask<String, Void, HttpResponse> {
+	private static class PostTask extends AsyncTask<String, Void, Boolean> {
 		ServerResource res;
 
 		protected PostTask(ServerResource res) {
@@ -132,13 +132,13 @@ public class RESTClient {
 		}
 
 		@Override
-		protected HttpResponse doInBackground(String... params) {
+		protected Boolean doInBackground(String... params) {
 			String link = params[0];
 			return doPost(res, link);
 		}
 
 		@Override
-		protected void onPostExecute(HttpResponse result) {
+		protected void onPostExecute(Boolean result) {
 			// Do something with result on UI Thread here if needed			
 		}
 	}

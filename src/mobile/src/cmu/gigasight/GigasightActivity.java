@@ -2,10 +2,15 @@ package cmu.gigasight;
 
 import cmu.servercommunication.RESTClient;
 import cmu.servercommunication.ServerSettings;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.InputFilter;
@@ -22,6 +27,7 @@ import android.widget.Toast;
 public class GigasightActivity extends Activity {
 
 	private final static String TAG = "GigasightActivity";
+	private static final int REQ_ENABLEWIFI = 222;
 	public static final String PREFS_NAME = "PersonalvmConfig";
 	public static final String STATE_IP = "STATE_IP";
 	public static final String STATE_RESTPORT = "STATE_RESTPORT";
@@ -51,6 +57,16 @@ public class GigasightActivity extends Activity {
 
 	}
 
+	public void onResume(){
+		super.onResume();
+		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		if (!mWifi.isConnected()) {
+		    buildAlertMessageNoWifi();
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_gigasight, menu);
@@ -167,4 +183,45 @@ public class GigasightActivity extends Activity {
 		
 	}
 	
+	private void buildAlertMessageNoWifi() {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(
+				"WiFi is currently disabled, do you want to enable it?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									final int id) {
+								startActivityForResult(										
+										new Intent(Settings.ACTION_WIFI_SETTINGS), REQ_ENABLEWIFI);
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, final int id) {
+						Toast.makeText(GigasightActivity.this,"WiFi must be enabled, closing application",
+								Toast.LENGTH_SHORT).show();
+						dialog.cancel();
+						GigasightActivity.this.finish();
+					}
+				});
+		final AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQ_ENABLEWIFI && resultCode == 0) {
+			ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+			NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+			if (mWifi.isConnectedOrConnecting()) {
+			    Toast.makeText(this,"WiFi enabled", Toast.LENGTH_SHORT).show();
+			} else{
+				//Users did not switch on the WiFi
+				Toast.makeText(GigasightActivity.this,"WiFi must be enabled, closing application",Toast.LENGTH_LONG).show();
+				GigasightActivity.this.finish();
+			}
+			
+			
+		}
+	}
 }

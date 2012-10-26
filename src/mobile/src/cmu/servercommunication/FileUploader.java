@@ -151,7 +151,7 @@ public class FileUploader implements Runnable {
 			else if (reply == STATUS_OK)
 				return true;
 		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
+			Log.e(TAG, ""+e.getMessage());
 			return false;
 		}
 		return false;

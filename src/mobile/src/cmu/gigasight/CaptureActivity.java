@@ -113,7 +113,6 @@ public class CaptureActivity extends Activity {
 				mp4stream = new MP4Stream(getOutputMediaFile());
 				mp4stream.open();
 				segment.addStream(mp4stream);
-				
 				registerSegmentAndStream();
 
 				Date startTime = mCamRec.startRecording(mp4stream.getFile());
@@ -219,6 +218,9 @@ public class CaptureActivity extends Activity {
 
 			@Override
 			protected void onPostExecute(Void result) {
+				if(!segment.isRegistered() || !mp4stream.isRegistered() || (gpsCapturing && !gpsstream.isRegistered()))
+					Toast.makeText(CaptureActivity.this,"Could not register segments and streams on server!",Toast.LENGTH_LONG).show();
+				else
 				Toast.makeText(CaptureActivity.this,
 						"Segments and streams registered on server",
 						Toast.LENGTH_SHORT).show();
@@ -227,14 +229,12 @@ public class CaptureActivity extends Activity {
 	}
 
 	private void cleanMediaFiles() {
-		File mediaStorageDir = new File(
-				Environment
-						.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
-				VIDEOPREFIX);
-		File[] files = mediaStorageDir.listFiles();
-
-		for (File f : files)
-			f.delete();
+		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),VIDEOPREFIX);
+		if(mediaStorageDir.exists()){
+			File[] files = mediaStorageDir.listFiles();
+			for (File f : files)
+				f.delete();
+		}
 	}
 
 	private static File getOutputMediaFile() {
