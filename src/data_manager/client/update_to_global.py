@@ -115,7 +115,7 @@ def put(global_url, resource_url, json_string):
 
 def filter_out(resource):
     ret_list = []
-    filter_key = ['tag', 'start_time']
+    filter_key = ['tag', 'start_time', 'length', 'location', 'start_time']
     for segment_id, values in resource.iteritems():
         filter_item = dict()
         mod_time = parser.parse(values['mod_time'])
@@ -143,6 +143,7 @@ def update_to_cloud(cloudlet_url):
     segment_resource = get_segment(cloudlet_url, segment_url)
     stream_resource = convert_to_dict(get_files(cloudlet_url, stream_url))
     tag_resource = convert_to_dict(get_files(cloudlet_url, tag_url))
+    tag_resource.update(segment_resource)
     tag_resource.update(stream_resource)
     tag_filtered = filter_out(tag_resource)
 
@@ -158,21 +159,28 @@ def update_to_cloud(cloudlet_url):
         cloudlet_resource_uri = cloudlet_dic[cloudlet_url]['resource_uri']
 
     for tag_item in tag_filtered:
-        # TODO: what's difference between tag and tag_value
         if tag_item.get('tag'):
             tag_item['tag_list'] = tag_item.get('tag')
 
-        if cloud_seg_dic.get(tag_item['seg_id']) == None:
+        if cloud_seg_dic.get(tag_item['seg_id'], None) == None:
             # POST for new segment
-            seg_info = segment_resource.get(tag_item['seg_id'])
-            if seg_info:
-                tag_item.update(seg_info)
             tag_item['cloudlet'] = cloudlet_resource_uri
+            if not tag_item.get('lengh'):
+                tag_item['length'] = 0
+            if not tag_item.get('location'):
+                tag_item['location'] = ''
+            if not tag_item.get('start_time'):
+                tag_item['start_time'] = u'2012-10-25T20:24:39+00:00'
             ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, tag_item)
         else:
             segment_resource_uri = cloud_seg_dic.get(tag_item['seg_id'])['resource_uri']
             tag_item['cloudlet'] = cloudlet_resource_uri
-            ret_dict = put(CLOUD_URL, segment_resource_uri, {'ipaddr':'0.0.0.0', 'url_prefix':cloudlet_url})
+            ret_dict = put(CLOUD_URL, segment_resource_uri, tag_item)
+            '''
+            pprint.pprint(tag_item)
+            print "put"
+            sys.exit(1)
+            '''
 
     #pprint.pprint(tag_filtered)
     #pprint.pprint(stream_resource)
