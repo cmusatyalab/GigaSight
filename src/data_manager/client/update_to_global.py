@@ -20,6 +20,7 @@ import httplib
 import json
 import sys
 import urllib
+import urllib2
 import pprint
 import datetime
 import time
@@ -37,16 +38,24 @@ class CloudletClientError(Exception):
     pass
 
 def get_files(cloudlet_url, resource_url):
+    def resource_to_segid(resource_url):
+        segment_id = [a.strip() for a in resource_url.split("/") if a != ''][-1]
+        return segment_id
+
     sys.stdout.write("Connecting to %s%s\n" % (cloudlet_url, resource_url))
     end_point = urlparse("%s%s" % (cloudlet_url, resource_url))
     params = urllib.urlencode({})
     headers = {"Content-type":"application/json"}
-    end_string = "%s" % (end_point[2])
+    end_string = "%s?%s" % (end_point[2], end_point[4])
     # HTTP response
     conn = httplib.HTTPConnection(end_point[1])
     conn.request("GET", end_string, params, headers)
     data = conn.getresponse().read()
     response_list = json.loads(data).get('objects', list())
+    for item in response_list:
+        if item.get('segment'):
+            item['seg_id'] = resource_to_segid(item.get('segment'))
+            item['segment'] = None
     conn.close()
     return response_list
 
@@ -69,15 +78,15 @@ def get_segment(cloudlet_url, resource_url):
     end_point = urlparse("%s%s" % (cloudlet_url, resource_url))
     params = urllib.urlencode({})
     headers = {"Content-type":"application/json"}
-    end_string = "%s" % (end_point[2])
+    end_string = "%s?%s" % (end_point[2], end_point[4])
     # HTTP response
     conn = httplib.HTTPConnection(end_point[1])
     conn.request("GET", end_string, params, headers)
     data = conn.getresponse().read()
     response_list = json.loads(data).get('objects', list())
-    ret_dic = dict([(resource_to_segid(seg['seg_id']), seg)  for seg in response_list])
+    #ret_dic = dict([(resource_to_segid(seg['seg_id']), seg)  for seg in response_list])
     conn.close()
-    return ret_dic
+    return response_list
 
 def post(global_url, resource_url, json_string):
     print("Posting to %s%s" % (global_url, resource_url))
@@ -112,23 +121,17 @@ def put(global_url, resource_url, json_string):
 
     return dd
 
+def filter_item(items):
+    ret_dict = dict()
+    filter_key = ['seg_id', 'tag_list', 'start_time', 'length', 'location', \
+            'start_time', 'cloudlet', 'mod_time']
+    for key in items:
+        if key in filter_key:
+            ret_dict[key] = items.get(key)
+    return ret_dict
 
-def filter_out(resource):
-    ret_list = []
-    filter_key = ['tag', 'start_time', 'length', 'location', 'start_time']
-    for segment_id, values in resource.iteritems():
-        filter_item = dict()
-        mod_time = parser.parse(values['mod_time'])
-        filter_item['seg_id'] = segment_id
-        filter_item['mod_time'] = values['mod_time']
-        for item in filter_key:
-            if values.get(item) != None:
-                filter_item[item] = values.get(item)
 
-        ret_list.append(filter_item)
-    return ret_list
-
-def update_to_cloud(cloudlet_url):
+def update_to_cloud(cloudlet_url, filter_date):
     global SEGMENT_RESOURCE
     global STREAM_RESOURCE
     global TAG_RESOURCE
@@ -136,18 +139,7 @@ def update_to_cloud(cloudlet_url):
     CLOUD_CLOUDLET = "/api/gm/cloudlet/"
     CLOUD_SEGMENT = "/api/gm/segment/"
 
-    # get cloudlet information
-    segment_url = "%s" % (SEGMENT_RESOURCE)
-    tag_url = "%s" % TAG_RESOURCE
-    stream_url = "%s?status=%s" % (STREAM_RESOURCE, 'FIN')
-    segment_resource = get_segment(cloudlet_url, segment_url)
-    stream_resource = convert_to_dict(get_files(cloudlet_url, stream_url))
-    tag_resource = convert_to_dict(get_files(cloudlet_url, tag_url))
-    tag_resource.update(segment_resource)
-    tag_resource.update(stream_resource)
-    tag_filtered = filter_out(tag_resource)
-
-    # get cloud information
+    # get global information
     cloud_cloudlet = get_files(CLOUD_URL, CLOUD_CLOUDLET)
     cloudlet_dic = dict([(seg['url_prefix'], seg)  for seg in cloud_cloudlet])
     cloud_segment = get_files(CLOUD_URL, CLOUD_SEGMENT)
@@ -158,32 +150,64 @@ def update_to_cloud(cloudlet_url):
     else:
         cloudlet_resource_uri = cloudlet_dic[cloudlet_url]['resource_uri']
 
-    for tag_item in tag_filtered:
+    # get cloudlet information
+    filter_date_string = filter_date.strftime("%Y-%m-%d %H:%M:%S").replace(" ", "%20")
+    segment_url = "%s?mod_time__gte=%s" % (SEGMENT_RESOURCE, filter_date_string)
+    tag_url = "%s?mod_time__gte=%s" % (TAG_RESOURCE, filter_date_string)
+    stream_url = "%s?mod_time__gte=%s&status=FIN" % \
+            (STREAM_RESOURCE, filter_date_string)
+    segment_resource = get_segment(cloudlet_url, segment_url)
+
+    #1. update segment update
+    for segment_item in segment_resource:
+        if cloud_seg_dic.get(segment_item['seg_id'], None) == None:
+            # POST for new segment
+            segment_item['cloudlet'] = cloudlet_resource_uri
+            ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, segment_item)
+        else:
+            segment_resource_uri = cloud_seg_dic.get(segment_item['seg_id'])['resource_uri']
+            segment_item['cloudlet'] = cloudlet_resource_uri
+            ret_dict = put(CLOUD_URL, segment_resource_uri, segment_item)
+
+    #2. update stream
+    stream_resource = get_files(cloudlet_url, stream_url)
+    for stream_item in stream_resource:
+        if cloud_seg_dic.get(stream_item['segment'], None) == None:
+            # POST for new segment
+            stream_item['cloudlet'] = cloudlet_resource_uri
+            pprint.pprint(filter_item(stream_item))
+            ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, filter_item(stream_item))
+        else:
+            stream_resource_uri = cloud_seg_dic.get(stream_item['seg_id'])['resource_uri']
+            stream_item['cloudlet'] = cloudlet_resource_uri
+            ret_dict = put(CLOUD_URL, stream_resource_uri, filter_item(stream_item))
+
+    #3. update tag
+    tag_resource = get_files(cloudlet_url, tag_url)
+    # TODO: this will overwrite previous tag
+    # if we try to read tags from global, tag will continuous become longer
+    prev_tag_list = dict()
+    for tag_item in tag_resource:
+        seg_id = tag_item['seg_id']
+        prev_tag = prev_tag_list.get(seg_id, None)
+        if prev_tag != None:
+            prev_tag_list[seg_id] = "%s;%s" % (prev_tag, tag_item.get('tag'))
+        else:
+            prev_tag_list[seg_id] = tag_item.get('tag')
+
+    for tag_item in tag_resource:
         if tag_item.get('tag'):
-            tag_item['tag_list'] = tag_item.get('tag')
+            tag_item['tag_list'] = prev_tag_list[tag_item['seg_id']]
 
         if cloud_seg_dic.get(tag_item['seg_id'], None) == None:
             # POST for new segment
             tag_item['cloudlet'] = cloudlet_resource_uri
-            if not tag_item.get('lengh'):
-                tag_item['length'] = 0
-            if not tag_item.get('location'):
-                tag_item['location'] = ''
-            if not tag_item.get('start_time'):
-                tag_item['start_time'] = u'2012-10-25T20:24:39+00:00'
-            ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, tag_item)
+            ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, filter_item(tag_item))
         else:
-            segment_resource_uri = cloud_seg_dic.get(tag_item['seg_id'])['resource_uri']
+            tag_resource_uri = cloud_seg_dic.get(tag_item['seg_id'])['resource_uri']
             tag_item['cloudlet'] = cloudlet_resource_uri
-            ret_dict = put(CLOUD_URL, segment_resource_uri, tag_item)
-            '''
-            pprint.pprint(tag_item)
-            print "put"
-            sys.exit(1)
-            '''
+            ret_dict = put(CLOUD_URL, tag_resource_uri, filter_item(tag_item))
 
-    #pprint.pprint(tag_filtered)
-    #pprint.pprint(stream_resource)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -192,10 +216,11 @@ if __name__ == "__main__":
 
     cloudlet_url = sys.argv[1]
     interval = int(sys.argv[2])
-
+    filter_date = datetime.strptime("2011-10-26 21:00:35", "%Y-%m-%d %H:%M:%S")
     while True:
         print "Update starting at %s" % datetime.now()
-        update_to_cloud(cloudlet_url)
+        update_to_cloud(cloudlet_url, filter_date)
+        filter_date = datetime.now()
         time.sleep(interval)
         print ""
 
