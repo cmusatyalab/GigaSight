@@ -1,5 +1,11 @@
 package cmu.location;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import java.util.ArrayList;
 
 import android.content.Context;

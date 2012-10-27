@@ -1,5 +1,11 @@
 package cmu.privacy;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 public class TimeCondition extends Condition {
 
 	String timeStart;
@@ -23,8 +29,8 @@ public class TimeCondition extends Condition {
 	protected String createDataString() {
 		StringBuilder dataString = new StringBuilder();
 		dataString.append("{");
-		dataString.append("\"time_start\" = \""+ timeStart + "\",");
-		dataString.append("\"time_stop\" = \""+ timeStop + "\"");
+		dataString.append("\"time_start\" : \""+ timeStart + "\",");
+		dataString.append("\"time_stop\" : \""+ timeStop + "\"");
 		dataString.append("}");
 		return dataString.toString();
 	

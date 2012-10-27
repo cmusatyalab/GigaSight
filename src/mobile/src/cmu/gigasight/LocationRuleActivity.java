@@ -1,5 +1,11 @@
 package cmu.gigasight;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import java.util.List;
 
 import cmu.location.PrivacyItemizedOverlay;

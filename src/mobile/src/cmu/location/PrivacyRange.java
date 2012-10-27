@@ -1,5 +1,11 @@
 package cmu.location;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;
 

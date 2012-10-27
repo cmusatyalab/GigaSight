@@ -13,29 +13,19 @@
         android:padding="5dp" >
 
         <Button
-            android:id="@+id/button_upload_recorded"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/button_livefeed"
-            android:layout_alignRight="@+id/button_livefeed"
-            android:onClick="startActivity"
-            android:text="@string/button_upload_recorded" />
-
-        <Button
-            android:id="@+id/button_livefeed"
+            android:id="@+id/button_capture_video"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/button_privacy"
             android:layout_alignRight="@+id/button_privacy"
-            android:layout_below="@id/button_upload_recorded"
-            android:onClick="startStreaming"
-            android:text="@string/button_livefeed" />
+            android:onClick="startActivity"
+            android:text="@string/button_capture_video" />
 
         <Button
             android:id="@+id/button_privacy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/button_livefeed"
+            android:layout_below="@id/button_capture_video"
             android:layout_centerHorizontal="true"
             android:onClick="startActivity"
             android:text="@string/button_privacy" />

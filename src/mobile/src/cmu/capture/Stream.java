@@ -1,5 +1,11 @@
 package cmu.capture;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,7 +17,7 @@ public class Stream extends ServerResource {
 
 	private static final String TAG = "Stream";
 	
-	enum Container {
+	public enum Container {
 		RTSP_RTP{
 			public String toString(){
 				return "RTSP_RTP";
@@ -41,6 +47,9 @@ public class Stream extends ServerResource {
 		this.serverCollection = seg.getServerLocation();		
 	}
 	
+	public Container getContainer(){
+		return c;
+	}
 	@Override
 	public String getCollection(){
 		this.serverCollection = seg.getServerLocation();

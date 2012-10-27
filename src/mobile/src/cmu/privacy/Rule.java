@@ -1,5 +1,11 @@
 package cmu.privacy;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import java.util.ArrayList;
 
 public class Rule {

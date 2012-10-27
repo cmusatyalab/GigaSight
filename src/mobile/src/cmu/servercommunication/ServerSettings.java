@@ -1,5 +1,11 @@
 package cmu.servercommunication;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import cmu.privacy.Privacy;
 
 public class ServerSettings {

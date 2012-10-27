@@ -1,5 +1,11 @@
 package cmu.privacy;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 public class LocationCondition extends Condition {
 
 	private String centre_lat;

@@ -1,5 +1,11 @@
 package cmu.servercommunication;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -90,8 +96,8 @@ public class RESTClient {
 			
 		} catch (IOException e) {
 			Message m = GigasightActivity.handler.obtainMessage(0,"Server problem: " + e.getMessage());
-			GigasightActivity.handler.sendMessage(m);			
-			e.printStackTrace();
+			GigasightActivity.handler.sendMessage(m);				
+			Log.w(TAG,e.getMessage());
 			return false;
 		} finally {
 			client.close();
@@ -117,7 +123,7 @@ public class RESTClient {
 		} catch (IOException e) {
 			Message m = GigasightActivity.handler.obtainMessage(0,"Server problem: " + e.getMessage());
 			GigasightActivity.handler.sendMessage(m);	
-			e.printStackTrace();
+			Log.w(TAG,e.getMessage());
 			return null;
 		} finally {
 			client.close();

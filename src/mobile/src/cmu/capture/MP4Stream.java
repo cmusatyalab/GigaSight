@@ -1,5 +1,11 @@
 package cmu.capture;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;

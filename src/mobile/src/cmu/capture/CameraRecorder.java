@@ -1,5 +1,10 @@
 package cmu.capture;
 
+/**
+* GigaSight - CMU 2012
+* @author Pieter Simoens
+* 
+*/ 
 
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +111,7 @@ public class CameraRecorder {
 		mRec.setProfile(mCP);
 
     	mRec.setOutputFile(outputFile.toString());
-    	Log.i(TAG, "video will be saved to: "+outputFile.toString());
+    	//Log.d(TAG, "Saving video in: "+outputFile.getAbsolutePath().toString());
     	mRec.setPreviewDisplay(mCameraPreview.getHolder().getSurface());
   
 		try {
