@@ -175,7 +175,6 @@ def update_to_cloud(cloudlet_url, filter_date):
         if cloud_seg_dic.get(stream_item['segment'], None) == None:
             # POST for new segment
             stream_item['cloudlet'] = cloudlet_resource_uri
-            pprint.pprint(filter_item(stream_item))
             ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, filter_item(stream_item))
         else:
             stream_resource_uri = cloud_seg_dic.get(stream_item['seg_id'])['resource_uri']

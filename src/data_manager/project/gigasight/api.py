@@ -35,6 +35,7 @@ class SegmentResource(ModelResource):
         resource_name = 'segment'
         list_allowed_methods = ['get', 'post']
         #excludes = ['seg_id']
+        filtering = {"mod_time":ALL}
 
 
 class StreamResource(ModelResource):
@@ -48,6 +49,7 @@ class StreamResource(ModelResource):
         resource_name = 'stream'
         list_allowed_methods = ['get', 'post', 'put']
         #excludes = ['container', 'id', 'pub_date', 'pk']
+        filtering = {"mod_time":ALL, "segment_id":('exact'), "status":ALL}
         
     def obj_create(self, bundle, request=None, **kwargs):
         segment = bundle.data.get("segment", None)
@@ -80,5 +82,6 @@ class TagResource(ModelResource):
         resource_name = 'tag'
         list_allowed_methods = ['get', 'post', 'put']
         excludes = ['id', 'pk']
+        filtering = {"mod_time":ALL, "segment_id":('exact')}
 
 

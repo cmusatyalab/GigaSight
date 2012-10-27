@@ -7,7 +7,6 @@ from uuid import uuid1
 class Segment(models.Model):
     seg_id = models.CharField(max_length=36, primary_key=True, default=lambda :str(uuid1()))
     mod_time = models.DateTimeField(default=datetime.datetime.now)
-    path = models.CharField(max_length=256)
     user_id = models.CharField(max_length=32)
     start_time = models.DateTimeField(default=datetime.datetime.now)
     length = models.IntegerField(default=0);
