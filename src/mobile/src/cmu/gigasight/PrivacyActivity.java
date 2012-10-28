@@ -37,7 +37,13 @@ public class PrivacyActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         rulesView = (TextView) findViewById(R.id.rules_view);
         p = Privacy.getInstance();
-        updatePrivacyView();
+        
+    }
+    
+    public void onResume(){
+    	super.onResume();
+    	updatePrivacyView();
+    	
     }
 
     @Override

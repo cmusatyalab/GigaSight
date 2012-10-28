@@ -118,6 +118,8 @@ public class CaptureActivity extends Activity {
 								.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 					}
 					if (last != null) {
+						Log.w(TAG,"Setting timestamp of cached location to current time");
+						last.setTime(new Date().getTime());
 						gpsstream.add(last);
 					}
 					gpsCapturing = true;

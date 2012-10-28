@@ -15,9 +15,10 @@ public class PrivacyRange extends OverlayItem {
 
 	public PrivacyRange(GeoPoint p, float radius_m) {
 		super(p,"Privacy","range in meters: "+radius_m);
-		this.radius_m = radius_m;
+		this.radius_m = radius_m;		
 	}
 	
+
 	public float getRadiusMeter(){
 		return radius_m;
 	}	

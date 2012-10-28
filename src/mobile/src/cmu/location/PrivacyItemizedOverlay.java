@@ -42,6 +42,7 @@ public class PrivacyItemizedOverlay extends ItemizedOverlay {
 	
 	public PrivacyItemizedOverlay(Drawable defaultMarker, EditText mRadiusText) {
 		super(boundCenterBottom(defaultMarker));
+		//Log.d(TAG,"Creating new PrivacyItemizedOverlay");
 		this.mRadiusText = mRadiusText;
 		this.mContext = mRadiusText.getContext();
 		populate(); // hack needed to initiate the overlay without any items
@@ -91,7 +92,7 @@ public class PrivacyItemizedOverlay extends ItemizedOverlay {
 		if(text.isEmpty())
 			Toast.makeText(mContext,"empty radius!", Toast.LENGTH_SHORT).show();
 		else{ 
-			float radius = Float.parseFloat(mRadiusText.getText().toString());
+			float radius = Float.parseFloat(text);			
 			PrivacyRange r = new PrivacyRange(p, radius);
 			addOverlay(r);
 			mapView.invalidate();			
@@ -111,9 +112,8 @@ public class PrivacyItemizedOverlay extends ItemizedOverlay {
 		//super.draw(canvas, mapView, shadow);
 		
 		//we do not need shadows
-		if(!shadow){
-			
-			//Log.d(TAG,"draw");
+		if(!shadow){			
+			//Log.d(TAG,"draw no overlays: "+mOverlays.size());
 			for(PrivacyRange r : mOverlays){
 				//Log.d(TAG,"overlay");
 				Point myPoint = new Point();
@@ -121,8 +121,7 @@ public class PrivacyItemizedOverlay extends ItemizedOverlay {
 				projection.toPixels(r.getPoint(),myPoint);				
 				int radiusPixel = (int) projection.metersToEquatorPixels(r.getRadiusMeter());
 				canvas.drawCircle(myPoint.x, myPoint.y, radiusPixel, paintFill);
-				canvas.drawCircle(myPoint.x, myPoint.y, radiusPixel, paintLine);
-	
+				canvas.drawCircle(myPoint.x, myPoint.y, radiusPixel, paintLine);	
 			}
 			super.draw(canvas, mapView, shadow); //draw the pins on top of the circles
 		}		
