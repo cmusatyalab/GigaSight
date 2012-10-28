@@ -33,32 +33,44 @@ def search(request):
         entries = entries.filter(start_time__gte=req_start_time)
     if req_end_time != '':
         entries = entries.filter(start_time__lte=req_end_time)
-    print entries
+    
+    #print entries[0].cloudlet.url_prefix+'\n'
 
-    cookies = []
-    urls = []
-    entry_prev = None
+    selected_entries = []
+    counter = 0
     for entry in entries:
-        if entry_prev != None and entry.cloudlet != entry_prev.cloudlet:
+        counter = counter + 1
+        try:
+            if request.GET['entry%d' % counter] == 'y':
+                selected_entries.append(entry)
+        except KeyError:
+            pass
+    if selected_entries == []:
+        selected_entries = entries
+
+    if request.GET['cookie']=="True":
+        cookies = []
+        urls = []
+        entry_prev = None
+        for entry in selected_entries:
+            if entry_prev != None and entry.cloudlet != entry_prev.cloudlet:
+                ip_addr = parse(entry_prev.cloudlet.url_prefix)
+                cookies.append(generate_cookie_django(urls,
+                                         servers=[ip_addr]))
+                urls = []
+            urls.append('http://127.0.0.1:5873/mp4video/'+entry.seg_id)
+            entry_prev = entry
+    
+        if entry_prev != None:
             ip_addr = parse(entry_prev.cloudlet.url_prefix)
             cookies.append(generate_cookie_django(urls,
                                      servers=[ip_addr]))
-            urls = []
-        urls.append('http://127.0.0.1:5873/mp4video/'+entry.seg_id)
-        entry_prev = entry
     
-    if entry_prev != None:
-        ip_addr = parse(entry_prev.cloudlet.url_prefix)
-        cookies.append(generate_cookie_django(urls,
-                                 servers=[ip_addr]))
-    
-    cookie = ''.join(cookies) 
-
-    if request.GET['cookie']=="True":
+        cookie = ''.join(cookies) 
         return HttpResponse(cookie, mimetype='application/x-diamond-scope')
     else:
         return render_to_response('cookiegen/index.html', 
             {'entries':entries, 'is_search':True, 
              'req_location':req_location, 'req_start_time':req_start_time, 
-             'req_end_time':req_end_time, 'ip_addr':ip_addr}, RequestContext(request))
+             'req_end_time':req_end_time }, RequestContext(request))
 

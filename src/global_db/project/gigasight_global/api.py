@@ -28,7 +28,7 @@ class CloudletResource(ModelResource):
         queryset = Cloudlet.objects.all()
         always_return_data = True
         resource_name = 'cloudlet'
-        list_allowed_methods = ['get', 'post']
+        list_allowed_methods = ['get', 'post', 'put']
         #excludes = ['seg_id']
 
 class SegmentResource(ModelResource):
@@ -41,7 +41,7 @@ class SegmentResource(ModelResource):
         queryset = Segment.objects.all()
         always_return_data = True
         resource_name = 'segment'
-        list_allowed_methods = ['get', 'post']
+        list_allowed_methods = ['get', 'post', 'put']
         #excludes = ['seg_id']
 
 
