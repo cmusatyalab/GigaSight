@@ -1,10 +1,10 @@
 package cmu.gigasight;
 
 /**
-* GigaSight - CMU 2012
-* @author Pieter Simoens
-* 
-*/ 
+ * GigaSight - CMU 2012
+ * @author Pieter Simoens
+ * 
+ */
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -29,6 +29,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -61,10 +62,11 @@ public class CaptureActivity extends Activity {
 	private FileUploader fileUploader;
 	private LocationManager locationManager;
 	private GPSStreamListener gpsListener;
+	private int noLocalStreams;
+	private Handler mHandler;
 	private static final int REQ_ENABLELOC = 123;
 	public static final String MEDIA_DIR = "GigaSight";
 
-	
 	private ProgressDialog progressDialog;
 
 	@Override
@@ -75,16 +77,15 @@ public class CaptureActivity extends Activity {
 		// Camera initialization is done in onResume, as the camera is released
 		// in the onPause state!
 
-		progressDialog = new ProgressDialog(this);
-		fileUploader = new FileUploader();
+		fileUploader = new FileUploader(this);
 		fileUploader.start();
+		mHandler = new Handler();
 
 		bCapture = (Button) findViewById(R.id.button_start_capture);
 		bCapture.setEnabled(true);
 		bStop = (Button) findViewById(R.id.button_stop_capture);
 		bStop.setEnabled(false);
 
-		
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		gpsListener = new GPSStreamListener();
 
@@ -93,13 +94,16 @@ public class CaptureActivity extends Activity {
 			public void onClick(View arg0) {
 				Log.d(TAG, "Capture button pressed");
 				// create new segment and streams each time the button is
-				// pressed				
+				// pressed
 				segment = new Segment(Segment.Type.RECORDED);
-				String [] streamNames = createStreamNames(new String [] {"VID", "GPS"}, new String [] {"mp4","csv"});
+				String[] streamNames = createStreamNames(new String[] { "VID",
+						"GPS" }, new String[] { "mp4", "csv" });
 
-				if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-					Log.d(TAG, "Start GPS capturing, results are written in "+ streamNames[1]);			
-					
+				if (locationManager
+						.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+					Log.d(TAG, "Start GPS capturing, results are written in "
+							+ streamNames[1]);
+
 					gpsstream = new GPSstream(new File(streamNames[1]));
 					gpsstream.open();
 					segment.addStream(gpsstream);
@@ -110,27 +114,30 @@ public class CaptureActivity extends Activity {
 							.requestLocationUpdates(
 									LocationManager.NETWORK_PROVIDER, 0, 0,
 									gpsListener);
-					Location last = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+					Location last = locationManager
+							.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 					if (last == null) {
-						last = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+						last = locationManager
+								.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 					}
 					if (last != null) {
-						Log.w(TAG,"Setting timestamp of cached location to current time");
+						Log.w(TAG,
+								"Setting timestamp of cached location to current time");
 						last.setTime(new Date().getTime());
 						gpsstream.add(last);
 					}
 					gpsCapturing = true;
 				}
 
-				
 				mp4stream = new MP4Stream(new File(streamNames[0]));
-				Log.d(TAG,"Start video capturing, results are written in "+streamNames[0]);
+				Log.d(TAG, "Start video capturing, results are written in "
+						+ streamNames[0]);
 				mp4stream.open();
-				segment.addStream(mp4stream);			
+				segment.addStream(mp4stream);
 
 				Date startTime = mCamRec.startRecording(mp4stream.getFile());
 				if (startTime != null) { // recording started
-					mp4stream.setStartTime(startTime);					
+					mp4stream.setStartTime(startTime);
 					bCapture.setEnabled(false);
 					bStop.setEnabled(true);
 				}
@@ -144,14 +151,14 @@ public class CaptureActivity extends Activity {
 				stopCapturing();
 			}
 		});
-		
+
 		Button bRes = (Button) findViewById(R.id.button_resolution);
 		bRes.setOnClickListener(new OnClickListener() {
-			public void onClick(View arg0){
-				Log.d(TAG,"Resolution button pressed");
+			public void onClick(View arg0) {
+				Log.d(TAG, "Resolution button pressed");
 				FragmentManager fm = getFragmentManager();
 				ResolutionDialog rd = new ResolutionDialog();
-	    		rd.show(fm,"resolution");  
+				rd.show(fm, "resolution");
 			}
 		});
 	}
@@ -165,15 +172,16 @@ public class CaptureActivity extends Activity {
 	public void onResume() {
 		Log.v(TAG, "onResume");
 
-		Log.d(TAG,"CLEANING DIRECTORY!");
-		cleanMediaFiles();
-		
-		if(isConnected()){
+		// Log.d(TAG,"CLEANING DIRECTORY!");
+		// cleanMediaFiles();
+
+		if (isConnected()) {
+			progressDialog = new ProgressDialog(this);
 			syncToPersonalVM();
-		}
-		else
-			Toast.makeText(this, "WiFi not enabled, offline operation",Toast.LENGTH_LONG).show();
-		
+		} else
+			Toast.makeText(this, "WiFi not enabled, offline operation",
+					Toast.LENGTH_LONG).show();
+
 		// initialize recording
 		mCamRec = new CameraRecorder(this);
 		mCamRec.initCameraRecorder();
@@ -200,20 +208,20 @@ public class CaptureActivity extends Activity {
 			mp4stream.setStopTime(stopTime);
 		mp4stream.setResolution(mCamRec.getResolution());
 		mp4stream.close();
-		
-		if (gpsCapturing) { 
+
+		if (gpsCapturing) {
 			locationManager.removeUpdates(gpsListener);
-			gpsstream.close();			 
+			gpsstream.close();
 		}
-				
-		if(isConnected())
+
+		if (isConnected())
 			syncSegment(segment);
 
 		gpsCapturing = false;
 		mp4stream = null;
 		gpsstream = null;
 		segment = null;
-		
+
 		bCapture.setEnabled(true);
 		bStop.setEnabled(false);
 	}
@@ -234,131 +242,138 @@ public class CaptureActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void syncToPersonalVM(){
-		File mediaStorageDir = new File(getExternalFilesDir(null)+ File.separator + MEDIA_DIR);
-		File [] segmentList = mediaStorageDir.listFiles();
-		if(segmentList == null)
+	private void syncToPersonalVM() {
+		File mediaStorageDir = new File(getExternalFilesDir(null)
+				+ File.separator + MEDIA_DIR);
+		File[] segmentList = mediaStorageDir.listFiles();
+		if (segmentList == null)
 			return;
-		
-		if(segmentList.length > 0){
-			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			progressDialog.setMessage("Syncing segments to personalVM");
-		}
-		          
-		for(File segDir : segmentList){			
-			if(segDir.isDirectory()){
+
+		for (File segDir : segmentList) {
+			if (segDir.isDirectory()) {
 				Segment seg = new Segment(Type.RECORDED);
-				
-				File [] streams = segDir.listFiles();				
-				if(streams.length == 0){
-					Log.d(TAG,"Deleting segment directory "+segDir.getAbsolutePath());
+				File[] streams = segDir.listFiles();
+				if (streams.length == 0) {
+					Log.d(TAG,
+							"Deleting segment directory "
+									+ segDir.getAbsolutePath());
 					segDir.delete();
 					continue;
-				}				
-				for(File stream : streams){
-					if(stream.getName().contains("VID"))
+				}
+				
+				for (File stream : streams) {
+					noLocalStreams++;
+					if (stream.getName().contains("VID"))
 						seg.addStream(new MP4Stream(stream));
-					else if(stream.getName().contains("GPS"))
+					else if (stream.getName().contains("GPS"))
 						seg.addStream(new GPSstream(stream));
 					else
-						Log.d(TAG,"Unknown stream: "+stream.getName());							
-				}				
-				//register segment and stream and initiate upload			
+						Log.d(TAG, "Unknown stream: " + stream.getName());
+				}
+				// register segment and stream and initiate upload				
 				syncSegment(seg);
-				//files will be deleted after upload by fileUploader
+				// files will be deleted after upload by fileUploader
 			}
-			
-
 		}
-		
+
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progressDialog.setMessage("Syncing " + noLocalStreams + " offline captured streams to personalVM");
+		progressDialog.show();
+
 	}
+
 	private void syncSegment(final Segment seg) {
 		new AsyncTask<Void, String, Void>() {
-		
+
 			Segment i_segment;
 			GPSstream i_gpsstream;
 			MP4Stream i_mp4stream;
-			
+
 			@Override
-            protected void onPreExecute()
-            {
-                /*
-                 * This is executed on UI thread before doInBackground(). It is
-                 * the perfect place to show the progress dialog.
-                 */				
-				i_segment = seg; //internal copy
-				
-            }
+			protected void onPreExecute() {
+				/*
+				 * This is executed on UI thread before doInBackground(). It is
+				 * the perfect place to show the progress dialog.
+				 */
+				i_segment = seg; // internal copy
+
+			}
+
 			@Override
 			protected Void doInBackground(Void... params) {
-				publishProgress("Registering segment...");
-				Log.d(TAG,"Registering segment");
+				// publishProgress("Registering segment...");
+				Log.d(TAG, "Registering segment");
 				RESTClient.post(i_segment, false);
-				
-				i_gpsstream = (GPSstream) i_segment.getStream(Stream.Container.GPS);
-				i_mp4stream = (MP4Stream) i_segment.getStream(Stream.Container.MP4);
-				
-				if(i_gpsstream == null){
-					Log.e(TAG,"GPSstream not found!");
-					return null;
-				}
-				if(i_mp4stream == null){
-					Log.e(TAG,"MP4stream not found!");
-					return null;
-				}
-				
-				// hack for Yu: first send the GPS
-				if(i_gpsstream != null){				
-					publishProgress("Registering GPS stream...");
-					Log.d(TAG,"Registering GPS stream");
-					RESTClient.post(i_segment.getStream(Stream.Container.GPS), false);
-				}
-				
-				/* now, register the mp4stream(s) */
-				publishProgress("Registering MP4 stream...");
-				Log.d(TAG,"Registering mp4 stream");
-				RESTClient.post(i_mp4stream, false);
-				
-							
-				//hack: we do a new put, should not be necessary because all information is already available in the post
-				RESTClient.put(i_mp4stream, true); 
-				
-			
-				//now start the upload
-				Log.d(TAG,"Starting upload of "+i_mp4stream.getFile().getName());
-				fileUploader.upload(i_mp4stream);		
-				
-				if (i_gpsstream != null) {
-					//hack: we do a new put, even though it is not necessary
-					RESTClient.put(i_gpsstream,true); 
-					fileUploader.upload(i_gpsstream);				 
-				}
-				
-					
 
+				i_gpsstream = (GPSstream) i_segment
+						.getStream(Stream.Container.GPS);
+				i_mp4stream = (MP4Stream) i_segment
+						.getStream(Stream.Container.MP4);
+
+				if (i_gpsstream == null) {
+					Log.e(TAG, "GPSstream not found!");
+					return null;
+				}
+				if (i_mp4stream == null) {
+					Log.e(TAG, "MP4stream not found!");
+					return null;
+				}
+
+				// hack for Yu: first send the GPS
+				if (i_gpsstream != null) {
+					// publishProgress("Registering GPS stream...");
+					Log.d(TAG, "Registering GPS stream");
+					RESTClient.post(i_segment.getStream(Stream.Container.GPS),
+							false);
+				}
+
+				/* now, register the mp4stream(s) */
+				// publishProgress("Registering MP4 stream...");
+				Log.d(TAG, "Registering mp4 stream");
+				RESTClient.post(i_mp4stream, false);
+
+				// hack: we do a new put, should not be necessary because all
+				// information is already available in the post
+				RESTClient.put(i_mp4stream, true);
+
+				// now start the upload
+				Log.d(TAG, "Starting upload of "+ i_mp4stream.getFile().getName());
+				fileUploader.upload(i_mp4stream);
+
+				if (i_gpsstream != null) {
+					// hack: we do a new put, even though it is not necessary
+					RESTClient.put(i_gpsstream, true);
+					fileUploader.upload(i_gpsstream);
+				}
+				publishProgress("Segment registered");
 				return null;
-				
 			}
 
 			@Override
 			protected void onProgressUpdate(String... s) {
-		        super.onProgressUpdate();
-		        progressDialog.setMessage(s[0]);
-		    }
+				super.onProgressUpdate();
+
+			}
+
 			@Override
 			protected void onPostExecute(Void result) {
-				progressDialog.dismiss();
-				if (!i_segment.isRegistered() || !i_mp4stream.isRegistered()
-						|| ((i_gpsstream != null) && !i_gpsstream.isRegistered()))
-					Toast.makeText(CaptureActivity.this,"Could not register segments and streams on server!",Toast.LENGTH_LONG).show();
+				// progressDialog.dismiss();
+				if (!i_segment.isRegistered()
+						|| !i_mp4stream.isRegistered()
+						|| ((i_gpsstream != null) && !i_gpsstream
+								.isRegistered()))
+					Toast.makeText(
+							CaptureActivity.this,
+							"Could not register segments and streams on server!",
+							Toast.LENGTH_LONG).show();
 				else
 					Toast.makeText(CaptureActivity.this,
-							"Segments and streams registered on server",Toast.LENGTH_LONG).show();
+							"Segments and streams registered on server",
+							Toast.LENGTH_LONG).show();
 			}
 		}.execute();
 	}
 
-	
 	private void cleanMediaFiles() {
 		File mediaStorageDir = new File(getExternalFilesDir(null)
 				+ File.separator + MEDIA_DIR);
@@ -378,50 +393,51 @@ public class CaptureActivity extends Activity {
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 		Log.d(TAG, "sd card state: " + Environment.getExternalStorageState());
-		File mediaStorageDir = new File(getExternalFilesDir(null) + File.separator + MEDIA_DIR);
-		if(!mediaStorageDir.exists()){
-			if(!mediaStorageDir.mkdirs()){
-				Log.d(TAG,"Failed to create directory "+mediaStorageDir);
+		File mediaStorageDir = new File(getExternalFilesDir(null)
+				+ File.separator + MEDIA_DIR);
+		if (!mediaStorageDir.exists()) {
+			if (!mediaStorageDir.mkdirs()) {
+				Log.d(TAG, "Failed to create directory " + mediaStorageDir);
 				return null;
 			}
 		}
-		
+
 		String segmentDir = null;
 		int segmentID = 0;
-		while(new File((segmentDir = mediaStorageDir.getAbsolutePath() + File.separator + segmentID)).exists())
+		while (new File((segmentDir = mediaStorageDir.getAbsolutePath()
+				+ File.separator + segmentID)).exists())
 			segmentID++;
 
 		File segDir = new File(segmentDir);
-		if(!segDir.exists()){ //it should never exist...
-			if(!segDir.mkdirs()){
-				Log.d(TAG,"Failed to create directory "+segDir);
+		if (!segDir.exists()) { // it should never exist...
+			if (!segDir.mkdirs()) {
+				Log.d(TAG, "Failed to create directory " + segDir);
 				return null;
 			}
-		}
-		else{
-			Log.e(TAG,"Already existing segment directory created!");
+		} else {
+			Log.e(TAG, "Already existing segment directory created!");
 			return null;
 		}
-		
-		
-		return segmentDir;		
-	}
-	
-	private String [] createStreamNames(String [] prefix, String [] suffix){
-		int noStreams = prefix.length;
-		String [] result = new String [noStreams];
-		String segmentDir = getNewSegmentDir();
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
-		for(int i = 0; i < noStreams; i++ ){			
-			result[i] = segmentDir + File.separator + prefix[i] + "_" + timeStamp + "." + suffix[i];
+		return segmentDir;
+	}
+
+	private String[] createStreamNames(String[] prefix, String[] suffix) {
+		int noStreams = prefix.length;
+		String[] result = new String[noStreams];
+		String segmentDir = getNewSegmentDir();
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+				.format(new Date());
+
+		for (int i = 0; i < noStreams; i++) {
+			result[i] = segmentDir + File.separator + prefix[i] + "_"
+					+ timeStamp + "." + suffix[i];
 		}
-		
+
 		return result;
 	}
 
-	
-		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQ_ENABLELOC && resultCode == 0) {
 			String provider = Settings.Secure.getString(getContentResolver(),
 					Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -463,9 +479,24 @@ public class CaptureActivity extends Activity {
 
 	private boolean isConnected() {
 		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		NetworkInfo mWifi = connManager
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 		return mWifi.isConnected();
+
+	}
+
+	public void onFileUploaded(String message) {
+		noLocalStreams--;
+		mHandler.post(new Runnable() {
+			public void run() {
+				progressDialog
+						.setMessage("Uploading offline captured segments to cloud: "
+								+ noLocalStreams + " left");
+				if (noLocalStreams == 0)
+					progressDialog.dismiss();
+			}
+		});
 
 	}
 }
