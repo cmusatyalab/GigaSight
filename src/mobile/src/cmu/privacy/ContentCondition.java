@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class ContentCondition extends Condition {
 
-	public static final String [] names = {"Satya", "Pieter", "Yu", "Babu", "Kiryong"};
+	public static final String [] names = {"Satya", "Pieter", "Yu", "Babu", "Kiryong", "Zhuo"};
 	ArrayList<String> data;
 	
 	public ContentCondition(){
@@ -25,6 +25,7 @@ public class ContentCondition extends Condition {
 	public ArrayList<String> getSelectedContent(){
 		return data;
 	}
+	
 	public void setSelected(ArrayList<String> newSelection){
 		data = newSelection;
 	}

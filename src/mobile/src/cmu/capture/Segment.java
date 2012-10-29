@@ -45,6 +45,7 @@ public class Segment extends ServerResource {
 	}
 	
 	public void addStream(Stream s){
+		Log.d(TAG,"adding stream of type " + s.getContainer());
 		streams.add(s);
 		s.setSegment(this);
 	}

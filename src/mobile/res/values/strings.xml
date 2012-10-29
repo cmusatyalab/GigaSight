@@ -35,5 +35,6 @@
     <string name="label_radius">Radius (m)</string>
     <string name="default_radius">50</string>
     <string name="save">Save</string>
+    <string name="dialog_pick_resolution">Choose the resolution</string>
 
 </resources>

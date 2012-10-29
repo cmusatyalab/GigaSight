@@ -3,3 +3,18 @@ Copyright (C) 2011-2012 Carnegie Mellon University
 
 This is a developing project and some features might not be stable yet.
 Please visit our website at <http://elijah.cs.cmu.edu/>.
+
+This code has been successfully run on a Google Nexus with Android Jelly Bean. Other devices might give problems, please report them.
+
+To deploy the application on your own device, the best way is to import the source code into Eclipse, compile and push through ADB. 
+
+You have to set a custom debug key in Eclipse to get the Google Maps to work.
+You have two options:
+a) you generate your own debug key and put the correct key in the AndroidManifest
+b) you use my debug key and set Eclipse to use a custom debug key via  Window->Preferences->Android->Build->Custom debugstore. Contact me to have the appropriate debug key.
+
+
+**Note on Privacy Settings
+Each time you press "Time", "Location" or "Content", you add a new rule with a single condition. This is the reason why, for example, you will not see your previously defined circles appearing on the Google Map in the ContentRuleActivity.
+
+

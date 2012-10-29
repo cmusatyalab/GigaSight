@@ -51,6 +51,18 @@ public class Privacy extends ServerResource {
 		RESTClient.put(this,true);
 	}
 
+	public ArrayList<Condition> getConditions(String t){		
+		ArrayList<Condition> result = new ArrayList<Condition>();
+		for (Rule r : rules){
+			for (Condition c : r.conditions){
+				if(c.getType().equals(t))
+					result.add(c);
+			}
+		}
+		
+		return result;		
+	}
+	
 	@Override
 	public String createJSON() {
 		StringBuilder b = new StringBuilder();

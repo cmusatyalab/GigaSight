@@ -15,6 +15,7 @@ import java.util.concurrent.TimeoutException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -91,14 +92,12 @@ public class CaptureActivity extends Activity {
 
 			public void onClick(View arg0) {
 				Log.d(TAG, "Capture button pressed");
-
 				// create new segment and streams each time the button is
 				// pressed				
 				segment = new Segment(Segment.Type.RECORDED);
 				String [] streamNames = createStreamNames(new String [] {"VID", "GPS"}, new String [] {"mp4","csv"});
 
-				if (locationManager
-						.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+				if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 					Log.d(TAG, "Start GPS capturing, results are written in "+ streamNames[1]);			
 					
 					gpsstream = new GPSstream(new File(streamNames[1]));
@@ -111,11 +110,9 @@ public class CaptureActivity extends Activity {
 							.requestLocationUpdates(
 									LocationManager.NETWORK_PROVIDER, 0, 0,
 									gpsListener);
-					Location last = locationManager
-							.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+					Location last = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 					if (last == null) {
-						last = locationManager
-								.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+						last = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 					}
 					if (last != null) {
 						Log.w(TAG,"Setting timestamp of cached location to current time");
@@ -125,6 +122,7 @@ public class CaptureActivity extends Activity {
 					gpsCapturing = true;
 				}
 
+				
 				mp4stream = new MP4Stream(new File(streamNames[0]));
 				Log.d(TAG,"Start video capturing, results are written in "+streamNames[0]);
 				mp4stream.open();
@@ -132,7 +130,7 @@ public class CaptureActivity extends Activity {
 
 				Date startTime = mCamRec.startRecording(mp4stream.getFile());
 				if (startTime != null) { // recording started
-					mp4stream.setStartTime(startTime);
+					mp4stream.setStartTime(startTime);					
 					bCapture.setEnabled(false);
 					bStop.setEnabled(true);
 				}
@@ -146,6 +144,16 @@ public class CaptureActivity extends Activity {
 				stopCapturing();
 			}
 		});
+		
+		Button bRes = (Button) findViewById(R.id.button_resolution);
+		bRes.setOnClickListener(new OnClickListener() {
+			public void onClick(View arg0){
+				Log.d(TAG,"Resolution button pressed");
+				FragmentManager fm = getFragmentManager();
+				ResolutionDialog rd = new ResolutionDialog();
+	    		rd.show(fm,"resolution");  
+			}
+		});
 	}
 
 	public void onDestroy() {
@@ -157,6 +165,9 @@ public class CaptureActivity extends Activity {
 	public void onResume() {
 		Log.v(TAG, "onResume");
 
+		Log.d(TAG,"CLEANING DIRECTORY!");
+		cleanMediaFiles();
+		
 		if(isConnected()){
 			syncToPersonalVM();
 		}
@@ -187,6 +198,7 @@ public class CaptureActivity extends Activity {
 		Date stopTime = mCamRec.stopRecording();
 		if (stopTime != null)
 			mp4stream.setStopTime(stopTime);
+		mp4stream.setResolution(mCamRec.getResolution());
 		mp4stream.close();
 		
 		if (gpsCapturing) { 
@@ -286,6 +298,14 @@ public class CaptureActivity extends Activity {
 				i_gpsstream = (GPSstream) i_segment.getStream(Stream.Container.GPS);
 				i_mp4stream = (MP4Stream) i_segment.getStream(Stream.Container.MP4);
 				
+				if(i_gpsstream == null){
+					Log.e(TAG,"GPSstream not found!");
+					return null;
+				}
+				if(i_mp4stream == null){
+					Log.e(TAG,"MP4stream not found!");
+					return null;
+				}
 				
 				// hack for Yu: first send the GPS
 				if(i_gpsstream != null){				
