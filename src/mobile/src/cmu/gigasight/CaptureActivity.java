@@ -275,11 +275,11 @@ public class CaptureActivity extends Activity {
 				// files will be deleted after upload by fileUploader
 			}
 		}
-
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progressDialog.setMessage("Syncing " + noLocalStreams + " offline captured streams to personalVM");
-		progressDialog.show();
-
+		if(noLocalStreams > 0){
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			progressDialog.setMessage("Syncing " + noLocalStreams + " offline captured streams to personalVM");
+			progressDialog.show();
+		}
 	}
 
 	private void syncSegment(final Segment seg) {
