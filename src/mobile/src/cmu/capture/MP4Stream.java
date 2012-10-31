@@ -21,6 +21,7 @@ public class MP4Stream extends FileStream {
 	private Date startTime;
 	private Date stopTime;
 	private long duration; // duration in seconds
+	private String resolution;
 	
 	private final static String TAG = "MP4Stream";
 
@@ -43,6 +44,9 @@ public class MP4Stream extends FileStream {
 		}
 	}
 
+	public void setResolution(String resolution){
+		this.resolution = resolution;
+	}
 	protected void fill(JSONObject obj) {
 		super.fill(obj);
 		try {
@@ -50,6 +54,8 @@ public class MP4Stream extends FileStream {
 				obj.put("startTime", sdf.format(startTime));
 			if (duration >= 0)
 				obj.put("duration", duration);
+			if (resolution != null)
+				obj.put("resolution",resolution);
 		} catch (JSONException e) {
 			Log.w(TAG, "JSONException");
 		}

@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import cmu.capture.FileStream;
 import cmu.capture.MP4Stream;
+import cmu.gigasight.CaptureActivity;
 
 import android.util.Log;
 
@@ -35,9 +36,11 @@ public class FileUploader implements Runnable {
 	private Socket uploadSocket;
 	private DataInputStream in;
 	private DataOutputStream out;
-
-	public FileUploader() {
+	private CaptureActivity cap;
+	
+	public FileUploader(CaptureActivity cap) {
 		this.queue = new LinkedBlockingQueue<FileStream>();
+		this.cap = cap;
 		STOP = new MP4Stream(new File("STOP"));
 
 	}
@@ -52,6 +55,7 @@ public class FileUploader implements Runnable {
 		}
 		else{
 			Log.w(TAG,"Could not upload "+s.getFile().getName()+" because it is not registered on the server");
+			cap.onFileUploaded("Stream not registered on server, could not upload!");
 		}
 	}
 
@@ -69,8 +73,10 @@ public class FileUploader implements Runnable {
 					break;
 				} else {
 					Log.d(TAG, "Upload " + element.getServerLocation());
-					send(element);
-					element.setUploaded();					
+					if(send(element)){
+						element.setUploaded();
+						cap.onFileUploaded("Upload completed of stream " + element.getServerLocation());
+					}
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();				
@@ -79,7 +85,7 @@ public class FileUploader implements Runnable {
 		
 	}
 
-	private void send(FileStream s) {
+	private boolean send(FileStream s) {
 		try {
 			Log.d(TAG,"Sending upload to server "+ServerSettings.serverIP+":"+ServerSettings.uploadPort);
 			uploadSocket = new Socket(ServerSettings.serverIP,
@@ -97,7 +103,7 @@ public class FileUploader implements Runnable {
 			if (!serverOK()) {
 				Log.i(TAG, "Aborting upload after error from server");
 				cleanUp();
-				return;
+				return false;
 			}
 
 			// send fileSize
@@ -109,7 +115,7 @@ public class FileUploader implements Runnable {
 			if (!serverOK()) {
 				Log.i(TAG, "Aborting upload after error from server");
 				cleanUp();
-				return;
+				return false;
 			}
 
 			// now do the actual upload
@@ -129,22 +135,25 @@ public class FileUploader implements Runnable {
 			// wait for ok
 			if (!serverOK()) {
 				cleanUp();
-				return;
+				return false;
 			}
 			
-			Log.d(TAG,"Upload finished of file "+s.getFile().getName()+" to "+s.getServerLocation());
-		} catch (NumberFormatException e) {
-			
+			Log.d(TAG,"Upload finished of file "+s.getFile().getName()+" to "+s.getServerLocation());			
+		} catch (NumberFormatException e) {			
 			Log.e(TAG, e.getMessage());
-		} catch (UnknownHostException e) {
-			
-			Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
-			
-			Log.e(TAG, e.getMessage());
-		} finally {
 			cleanUp();
+			return false;
+		} catch (UnknownHostException e) {			
+			Log.e(TAG, e.getMessage());
+			cleanUp();
+			return false;
+		} catch (IOException e) {			
+			Log.e(TAG, e.getMessage());
+			cleanUp();
+			return false;
 		}
+		cleanUp();
+		return true;
 
 	}
 

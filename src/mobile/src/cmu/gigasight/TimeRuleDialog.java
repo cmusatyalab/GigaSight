@@ -31,6 +31,11 @@ import android.widget.EditText;
 public class TimeRuleDialog extends DialogFragment {
 	private static final String TAG = "TimeRuleDialog";
 	private View v;
+	EditText startHour;
+	EditText startMin;
+	EditText stopHour;
+	EditText stopMin;
+
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -44,13 +49,13 @@ public class TimeRuleDialog extends DialogFragment {
 		// Pass null as the parent view because its going in the dialog layout
 		builder.setView(v);
 
-		final EditText startHour = (EditText) v
+		startHour = (EditText) v
 				.findViewById(R.id.edit_start_hour);
-		final EditText startMin = (EditText) v
+		startMin = (EditText) v
 				.findViewById(R.id.edit_start_min);
-		final EditText stopHour = (EditText) v
+		stopHour = (EditText) v
 				.findViewById(R.id.edit_stop_hour);
-		final EditText stopMin = (EditText) v.findViewById(R.id.edit_stop_min);
+		stopMin = (EditText) v.findViewById(R.id.edit_stop_min);
 
 		startHour.addTextChangedListener(new JumpFocusToView(startMin));
 		startMin.addTextChangedListener(new JumpFocusToView(stopHour));
@@ -61,6 +66,8 @@ public class TimeRuleDialog extends DialogFragment {
 				.setPositiveButton(R.string.blank,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
+								if(!validateInput())
+									return; //invalid input
 								Rule r = new Rule(Action.BLANK);
 								String startTime = startHour.getText().toString() + ":" + startMin.getText().toString();
 								String stopTime = stopHour.getText().toString()+ ":" + stopMin.getText().toString(); 
@@ -83,6 +90,32 @@ public class TimeRuleDialog extends DialogFragment {
 
 		// return the dialog
 		return builder.create();
+	}
+	
+	private boolean validateInput(){
+		int startH = Integer.parseInt(startHour.getText().toString());
+		int stopH = Integer.parseInt(stopHour.getText().toString());
+		int startM = Integer.parseInt(startMin.getText().toString());
+		int stopM = Integer.parseInt(stopMin.getText().toString());
+
+		String errorDescription = "";
+		if(stopH > startH)
+			return true;
+		if((stopH == startH) && (stopM >= startM))
+			return true;
+		
+		errorDescription = "End time is before start time";
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setMessage("Invalid input: "+errorDescription)
+			   .setPositiveButton("OK", new DialogInterface.OnClickListener() {			
+           public void onClick(DialogInterface dialog, int id) {
+        	   dialog.dismiss();
+           }
+       });
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		return false;
 	}
 
 	class JumpFocusToView implements TextWatcher {

@@ -30,5 +30,13 @@
 	      android:layout_height="wrap_content"
 	      android:text="Stop" 
 	      android:layout_gravity="center"/>
+	  <Button
+	      android:id="@+id/button_resolution"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="Resolution"
+	      android:layout_marginTop="50sp"
+	      android:layout_gravity="center"/>
+  	
 	</LinearLayout>	
 </LinearLayout>

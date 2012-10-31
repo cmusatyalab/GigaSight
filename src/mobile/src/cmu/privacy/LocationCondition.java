@@ -33,9 +33,9 @@ public class LocationCondition extends Condition {
 	protected String createDataString() {
 		StringBuilder dataString = new StringBuilder();
 		dataString.append("{");
-		dataString.append("\"centre_lat\" = "+ (centre_lat_e6*1.0)/1000000 + ",");
-		dataString.append("\"centre_long\" = "+ (centre_long_e6*1.0)/1000000 + ",");
-		dataString.append("\"radius\" = "+radius_m);
+		dataString.append("\"centre_lat\": "+ (centre_lat_e6*1.0)/1000000 + ",");
+		dataString.append("\"centre_long\": "+ (centre_long_e6*1.0)/1000000 + ",");
+		dataString.append("\"radius\": "+radius_m);
 		dataString.append("}");
 		return dataString.toString();
 	}
