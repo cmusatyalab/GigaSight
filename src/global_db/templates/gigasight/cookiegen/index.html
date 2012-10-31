@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Video segments cookie generator</title>
+    <!-- Bootstrap -->
+    <link href="{{ STATIC_URL }}assets/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}assets/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}assets/css/docs.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <SCRIPT TYPE="text/javascript">
+
+    function checkAll(entryForm)
+    {
+      if(entryForm.allEntry.checked)
+      {
+	    {% for entry in entries %}
+		  entryForm.entry{{ forloop.counter }}.checked = true
+		{% endfor %}
+	  }
+      else
+      {
+		{% for entry in entries %}
+		  entryForm.entry{{ forloop.counter }}.checked = false
+		{% endfor %}
+      }
+    }
+    function checkIt(entryForm)
+    {
+      flag = true;
+	  {% for entry in entries %}
+	    if (entryForm.entry{{ forloop.counter }}.checked == false)
+		{
+		  flag = false;
+	    }
+	  {% endfor %}
+	  if (flag) 
+      {
+        entryForm.allEntry.checked = true;
+      }
+	  else
+      {
+        entryForm.allEntry.checked = false;
+      }
+    }
+    </SCRIPT>
+  </head>
+  <body>
+    <h1>Search your video!</h1> <hr>
+      <!--
+      <div class="bs-docs-grid">
+        <div class="row show-grid">
+          <div class="span4">AAA</div>
+          <div class="span8">BBBB</div>
+        </div>
+      </div>
+      -->
+    <form action="/cookiegen/search" method="get">
+    {% csrf_token %}
+      <div>
+        <div class="row-fluid">
+          <div class="span3">
+            <b>Location: </b>      
+            <input type="text" name="location" value="{{ req_location }}" placeholder="location">
+          </div>
+        </div>
+        <div class="row-fluid">
+          <div class="span6">
+            <b>Time: </b>
+            from      
+            <input type="text" name="start_time" value="{{ req_start_time }}" placeholder="yyyy-mm-dd">
+            to      
+            <input type="text" name="end_time" value="{{ req_end_time }}" placeholder="yyyy-mm-dd">
+          </div>
+        </div>
+        <div class="row-fluid">
+          <div class="span3">
+            <b>MSRC filters: </b>      
+            <select>
+              <option>Filter 1</option>
+              <option>Filter 2</option>
+              <option>Filter 3</option>
+              <option>Filter 4</option>
+              <option>Filter 5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <br>
+      {% if is_search %}
+        <p>
+          {{ entries|length }} segments found.
+        </p>
+      {% load tz %}
+	  {% for entry in entries %}
+	     <label class="checkbox">
+			 <input type="checkbox" checked=true name="entry{{ forloop.counter }}" value="y" onClick="checkIt(this.form)">
+	       Seg_ID={{ entry.seg_id }}; Location={{ entry.location }}; 
+	       Start_time={{ entry.start_time }};  
+		   URL={{ entry.cloudlet.url_prefix }}; Tag={{ entry.tag_list }}
+	     </label>
+	  {% endfor %}
+	  <label class="checkbox">
+		  <input type="checkbox" checked=true name="allEntry" onClick="checkAll(this.form)">
+		  Select All
+      </label>
+      {% endif %}
+      <p>
+        <button class="btn" type="submit" name="cookie" value="False">Search</button>
+        <button class="btn btn-primary" type="submit" name="cookie" value="True">Generate Cookie</button>
+      </p>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="{{ STATIC_URL }}assets/js/bootstrap.js"></script>
+  </body>
+</html>

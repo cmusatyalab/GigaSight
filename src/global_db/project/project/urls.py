@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
-from myapp.api import EntryResource, UserResource
-from gigasight.api import SegmentResource, StreamResource, TagResource
+from gigasight_global.api import CloudletResource, SegmentResource
 from tastypie.api import Api
 
 
@@ -8,14 +7,10 @@ from tastypie.api import Api
 from django.contrib import admin
 admin.autodiscover()
 
-v1_api = Api(api_name='v1')
-v1_api.register(UserResource())
-v1_api.register(EntryResource())
+gm = Api(api_name='gm')
+gm.register(CloudletResource())
+gm.register(SegmentResource())
 
-dm = Api(api_name='dm')
-dm.register(SegmentResource())
-dm.register(StreamResource())
-dm.register(TagResource())
 
 urlpatterns = patterns('',
     # Examples:
@@ -29,6 +24,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     
     #(r'^blog/', include('myapp.urls')),
-    (r'^test/', include(v1_api.urls)),
-    (r'^api/', include(dm.urls)),
+    (r'^api/', include(gm.urls)),
 )

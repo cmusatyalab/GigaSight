@@ -1,9 +1,7 @@
-# Django settings for project project.
+# Django settings for gigasight project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-TASTYPIE_FULL_DEBUG = True
-APPEND_SLASH = False
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -26,7 +24,7 @@ DATABASES = {
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -58,7 +56,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '/home/ubuntu/GigaSight/src/global_db/gigasight/STATIC_ROOT/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -69,6 +67,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/home/ubuntu/GigaSight/src/global_db/gigasight/STATIC_DIRS',
 )
 
 # List of finder classes that know how to find static files in
@@ -80,7 +79,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'rny#r^k72%@e+*3_xhv3alnu4261$l5m_32gymqmjlinr5+$#1'
+SECRET_KEY = '!c%m*j&amp;w8iis9w&amp;3hnh-h2w^%6r+wvv990bxek0f&amp;$kiz9)$(e'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -99,15 +98,16 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'gigasight.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'gigasight.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    "/home/ubuntu/GigaSight/src/global_db/templates/gigasight"
 )
 
 INSTALLED_APPS = (
@@ -121,9 +121,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'myapp',
-    'gigasight',
-    'tastypie',
+    'cookiegen',
 )
 
 # A sample logging configuration. The only tangible logging
