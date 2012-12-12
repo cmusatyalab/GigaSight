@@ -98,3 +98,8 @@ It assumes that you have results for 1..8 nodes, and 10 iterations each. You mig
 if you have a different number of results. 
 
 The results can be imported in Excel. Have a look at the Excel files to see how this should be done.
+
+
+4) Average power consumption
+The CSV files from the Monsoon are very large. I imported them in MatLab to calculate the average. 
+The script I used in Matlab (.m) is on GitHub as well)
