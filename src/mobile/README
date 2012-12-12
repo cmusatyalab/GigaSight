@@ -18,3 +18,4 @@ b) you use my debug key and set Eclipse to use a custom debug key via  Window->P
 Each time you press "Time", "Location" or "Content", you add a new rule with a single condition. This is the reason why, for example, you will not see your previously defined circles appearing on the Google Map in the ContentRuleActivity.
 
 
+test

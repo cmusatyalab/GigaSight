@@ -1,0 +1,18 @@
+<resources>
+
+    <string name="app_name">cmu.Experimentclient</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">GigaSight Experiment Client</string>
+    <string name="label_nodeip">Node IP</string>
+    <string name="unknown_ip">IP address not known</string>
+    <string name="label_expman_ip">ExpMan IP</string>
+    <string name="label_nodename">Node name</string>
+    <string name="unknown">unknown</string>
+    <string name="label_expman_port">ExpMan port</string>
+    <string name="label_upload_port">Upload port</string>
+    <string name="label_upload_ip">Upload IP</string>
+    <string name="def_controlport">9090</string>
+    <string name="def_controlip">192.168.2.13</string>
+
+</resources>

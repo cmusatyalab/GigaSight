@@ -82,6 +82,6 @@ class TagResource(ModelResource):
         resource_name = 'tag'
         list_allowed_methods = ['get', 'post', 'put']
         excludes = ['id', 'pk']
-        filtering = {"mod_time":ALL, "segment_id":('exact')}
+        filtering = {"mod_time":ALL, "segment_id":('exact'), "tag":ALL, "segment":ALL}
 
 

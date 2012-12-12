@@ -3,9 +3,16 @@ import hashlib
 from django.contrib.auth.models import User
 from django.db import models
 from uuid import uuid1
+from uuid import uuid4
 
 class Segment(models.Model):
-    seg_id = models.CharField(max_length=36, primary_key=True, default=lambda :str(uuid1()))
+    #seg_id = models.CharField(max_length=36, primary_key=True, default=lambda :str(uuid1()))
+    #seg_id = models.CharField(max_length=36, primary_key=True, default=lambda :str(Segment.objects.count()))
+    
+    # Fix it later
+    # counting segment object number is not thread-safe. Add random at front.
+    seg_id = models.CharField(max_length=36, primary_key=True, \
+            default=lambda :str(str(uuid4())[:-1*len(str(Segment.objects.count()))]+str(Segment.objects.count())))
     mod_time = models.DateTimeField(default=datetime.datetime.now)
     user_id = models.CharField(max_length=32)
     start_time = models.DateTimeField(default=datetime.datetime.now)
