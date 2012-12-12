@@ -29,6 +29,15 @@ public:
         the_condition_variable.notify_one();
     }
 
+    void read_first_value(Data& value){
+
+    	boost::mutex::scoped_lock lock(the_mutex);
+    	if(!the_queue.empty())
+    		value = the_queue.front();
+    	else
+    		value = NULL;
+    }
+
     bool empty() const
     {
         boost::mutex::scoped_lock lock(the_mutex);
@@ -60,6 +69,8 @@ public:
         the_queue.pop();
     }
 
+
+
     int size()
     {
        	return the_queue.size();
@@ -67,10 +78,14 @@ public:
 
     void clean(){
 
+    	boost::mutex::scoped_lock lock(the_mutex);
     	while(!the_queue.empty()){
     		the_queue.pop();
     	}
+
     }
+
+
 };
 
 /*

@@ -16,7 +16,7 @@
 #include <boost/bind.hpp>
 #include <jansson.h>
 #include "request.hpp"
-
+#include "../ResourceManagement/StreamInformation.h"
 
 using boost::asio::ip::tcp;
 
@@ -30,6 +30,11 @@ public:
 	//return streamID
 	bool requestForStream(const std::string& host_, const unsigned short port_, const http::server::request& req, int type, std::string& uri, std::string& path);
 
+	void updateProcessingStatus(const std::string& host_, const unsigned short port_, const std::string streamID, const PROCESSING_STATUS statusCode);
+
+	void updateStreamInformation(const std::string& host_, const unsigned short port_, const std::string streamID, std::string body);
+
+	void updateSegmentInformation(const std::string& host_, const unsigned short port_, const std::string segmentID, std::string body);
 private:
 /*	void handle_resolve(const boost::system::error_code& err,
 	      tcp::resolver::iterator endpoint_iterator);

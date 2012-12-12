@@ -24,6 +24,8 @@ connection::connection(boost::asio::io_service& io_service,
     connection_manager_(manager),
     request_handler_(handler)
 {
+	partStr = "";
+	receivedBytes = 0;
 }
 
 boost::asio::ip::tcp::socket& connection::socket()
@@ -33,10 +35,17 @@ boost::asio::ip::tcp::socket& connection::socket()
 
 void connection::start()
 {
-  socket_.async_read_some(boost::asio::buffer(buffer_),
+
+
+	socket_.async_receive(boost::asio::buffer(buffer_),
       boost::bind(&connection::handle_read, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
+
+  /*socket_.async_read_some(boost::asio::buffer(buffer_),
+      boost::bind(&connection::handle_read, shared_from_this(),
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::bytes_transferred));*/
 }
 
 void connection::stop()
@@ -48,43 +57,120 @@ void connection::handle_read(const boost::system::error_code& e,
     std::size_t bytes_transferred)
 {
 
-	std::cout << "handle read" << std::endl;
-  if (!e)
-  {
-    boost::tribool result;
-    boost::tie(result, boost::tuples::ignore) = request_parser_.parse(
-        request_, buffer_.data(), buffer_.data() + bytes_transferred);
+	bool bComplete = false;
 
-    //added: parse the body of the message if Content-Length > 0
-    //todo: set the result variable
-    for(unsigned int i = 0; i < request_.headers.size(); i++){
-    	if(!(request_.headers[i].name.compare("Content-Length"))){
-    		int contentLength = boost::lexical_cast<int>(request_.headers[i].value);
-    		request_parser_.parseBody(request_, buffer_.data(), contentLength);
+	if (!e)
+	{
+
+		boost::tribool result;
+
+		boost::tie(result, boost::tuples::ignore) = request_parser_.parse(
+				request_, buffer_.data(), buffer_.data() + bytes_transferred);
+
+		//std::cout << "bytes_transferred " << bytes_transferred << std::endl;
+
+		receivedBytes += bytes_transferred;
+
+		//added: parse the body of the message if Content-Length > 0
+		//todo: set the result variable
+		for(unsigned int i = 0; i < request_.headers.size(); i++){
+
+			if(!(request_.headers[i].name.compare("Content-Length"))){
+
+				int contentLength = boost::lexical_cast<int>(request_.headers[i].value);
+
+				//std::cout << "Content-Length " << contentLength << std::endl;
+
+				if (contentLength > receivedBytes){
+					//std::cout << "part of data has not arrived " << std::endl;
+
+					partStr.append(buffer_.data());
+
+					buffer_.assign(0);
+
+					socket_.async_read_some(boost::asio::buffer(buffer_),
+    			           boost::bind(&connection::handle_read, shared_from_this(),
+    			             boost::asio::placeholders::error,
+    			             boost::asio::placeholders::bytes_transferred));
+					return;
+				}
+
+
+				if (!partStr.empty()){
+
+					partStr.append(buffer_.data());
+
+					//std::cout << partStr.data() << std::endl;
+
+					if (!request_parser_.parseBody(request_, partStr.c_str(), contentLength)){
+
+						partStr.assign(0);
+						buffer_.assign(0);
+
+						return;
+					} else
+						bComplete = true;
+
+				} else{
+
+					if (!request_parser_.parseBody(request_, buffer_.data(), contentLength)){
+    					partStr.assign(0);
+    					buffer_.assign(0);
+    					return;
+					}else
+						bComplete = true;
+
+				}
+
     		break;
     	}
     }
 
-    if (result)
+
+    if (bComplete)
     {
-      request_handler_.handle_request(request_, reply_);
-      boost::asio::async_write(socket_, reply_.to_buffers(),
+
+    	request_handler_.handle_request(request_, reply_);
+
+    	request_.body.clear();//shall we clear it here
+    	partStr.clear();
+    	buffer_.assign(0);
+
+    	bComplete = false;
+
+    	receivedBytes = 0;
+
+    	boost::asio::async_write(socket_, reply_.to_buffers(),
           boost::bind(&connection::handle_write, shared_from_this(),
             boost::asio::placeholders::error));
+
+
     }
     else if (!result)
     {
-      reply_ = reply::stock_reply(reply::bad_request);
-      boost::asio::async_write(socket_, reply_.to_buffers(),
+
+
+    	partStr.clear();
+
+    	buffer_.assign(0);
+
+    	receivedBytes = 0;
+
+    	reply_ = reply::stock_reply(reply::bad_request);
+
+    	boost::asio::async_write(socket_, reply_.to_buffers(),
           boost::bind(&connection::handle_write, shared_from_this(),
             boost::asio::placeholders::error));
     }
     else
     {
-      socket_.async_read_some(boost::asio::buffer(buffer_),
+
+    	socket_.async_read_some(boost::asio::buffer(buffer_),
           boost::bind(&connection::handle_read, shared_from_this(),
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
+
+
     }
   }
   else if (e != boost::asio::error::operation_aborted)

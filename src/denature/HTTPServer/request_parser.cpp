@@ -18,6 +18,7 @@ namespace server {
 request_parser::request_parser()
   : state_(method_start)
 {
+
 }
 
 void request_parser::reset()
@@ -25,11 +26,16 @@ void request_parser::reset()
   state_ = method_start;
 }
 
-void request_parser::parseBody(request& req, const char* dataPtr, int contentLength){
+bool request_parser::parseBody(request& req, const char* dataPtr, int contentLength){
 	//skip until we find the message body
+
+	std::cout << "PARSE BODY" << std::endl;
 	bool bodyFound = false;
 	char c = *dataPtr;
+
+	std::cout << dataPtr << std::endl;
 	while(!bodyFound){
+
 		while(c != '\r')
 			c = *dataPtr++;
 		//dataPtr now points to \n
@@ -42,14 +48,35 @@ void request_parser::parseBody(request& req, const char* dataPtr, int contentLen
 			dataPtr++; //make sure it points to the first char
 		}
 	}
+
+	std::cout << "req.body" << contentLength << std::endl;
+
 	int count = 0;
+
 	while(count < contentLength){
 		req.body.push_back(*dataPtr);
 		dataPtr++;
 		count++;
 	}
-	std::cout << req.body << std::endl;
+
+
+
+	//std::cout << req.body << std::endl;
+
+
+	if (count == contentLength)
+		return true;
+	else{
+		std::cout << "parse error" << std::endl;
+		return false;
+	}
+
+
 }
+
+
+
+
 
 boost::tribool request_parser::consume(request& req, char input)
 {

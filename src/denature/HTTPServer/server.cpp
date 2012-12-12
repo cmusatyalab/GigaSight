@@ -10,32 +10,35 @@
 
 #include "server.hpp"
 #include <boost/bind.hpp>
+#include <jansson.h>
 
 namespace http {
 namespace server {
 
-server::server(const std::string& address, const std::string& port, SegmentInformation* s, ProcessingRuleContainer* c)
+server::server(SharedQueue<SegmentInformation*>* s, ProcessingRuleContainer* c)
   : io_service_(),
-    listenPort(port),
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(new connection(io_service_,
           connection_manager_, request_handler_)),
     request_handler_(),
-    currentSegment(s),
+    segmentQueue(s),
     ruleManager(c),
     bBinded(false)
 {
 
+	loadConfiguration();
+
 	// Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
 	boost::asio::ip::tcp::resolver resolver(io_service_);
-	boost::asio::ip::tcp::resolver::query query(address, port);
+	std::cout << "host:" << host_ << ":" << listenPort << std::endl;
+	boost::asio::ip::tcp::resolver::query query(host_, listenPort);
 	endpoint = *resolver.resolve(query);
 
 	acceptor_.open(endpoint.protocol());
 	acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 
-	request_handler_.configure(s, c);
+	request_handler_.configure(dmUri_, dmPort_, s, c);
 
 	int currentPort;
 
@@ -43,10 +46,23 @@ server::server(const std::string& address, const std::string& port, SegmentInfor
 
 		currentPort = endpoint.port() +1;
 		endpoint.port(currentPort);
+
+		if (currentPort - atoi(listenPort.c_str()) > 10){
+
+			std::cout << "Is " << endpoint.address() <<  " the right host address" << std::endl;
+			return;
+		}
 	}
 
 
-	acceptor_.listen();
+	try{
+		acceptor_.listen();
+	}catch (boost::system::system_error& e) {
+
+		std::cout << "acceptor_.listen() failed "<< e.what() <<  std::endl;
+
+		return;
+	}
 
 	acceptor_.async_accept(new_connection_->socket(),
 		boost::bind(&server::handle_accept, this,
@@ -70,11 +86,12 @@ bool server::bindTCPPort(){
 	return true;
 }
 
+
 void server::run(){
 
 	if (bBinded){
 
-		std::cout << "HTTP server is listening on port " << listenPort << std::endl;
+		std::cout << "HTTP server is listening on port " << endpoint.port() << std::endl;
 		// The io_service::run() call will block until all asynchronous operations
 		// have finished. While the server is running, there is always at least one
 		// asynchronous operation outstanding: the asynchronous accept call waiting
@@ -110,7 +127,10 @@ void server::handle_accept(const boost::system::error_code& e)
 		acceptor_.async_accept(new_connection_->socket(),
 				boost::bind(&server::handle_accept, this,
 				boost::asio::placeholders::error));
-  }
+   }
+	else
+		std::cout << "error in handle_accept" << e.message()  << std::endl;
+
 
 }
 
@@ -124,6 +144,61 @@ void server::handle_stop()
 
 	bBinded = false;
 }
+
+void server::loadConfiguration(){
+
+	json_error_t err_t;
+	json_t* root = json_load_file("XMLFiles/config.json", 0, &err_t);
+	json_t* address = NULL;
+	json_t* port = NULL;
+	json_t* dmAddr = NULL;
+	json_t* dmPort = NULL;
+
+	if (root != NULL){
+
+		address = json_object_get(root, "PRIVATEVM_URI");
+
+		//tcp port used by http server
+		port = json_object_get(root, "PRIVATEVM_TCP_PORT");
+
+		dmAddr = json_object_get(root, "DATAMANAGER_URI");
+
+		dmPort = json_object_get(root, "DATAMANAGER_PORT");
+
+	}
+
+	if (address != NULL)
+		host_ = json_string_value(address);
+	else
+		host_ = "127.0.0.1";
+
+	if (port != NULL)
+		listenPort = json_string_value(port);
+	else
+		listenPort = "12345";
+
+	if (dmAddr != NULL)
+		dmUri_ = json_string_value(dmAddr);
+	else
+		dmUri_ = "127.0.0.1";
+
+	if ((dmPort != NULL) && (json_is_string(dmPort)))
+		dmPort_ = json_string_value(dmPort);
+	else
+		dmPort_ = "5000";
+
+
+
+	json_object_clear(dmAddr);
+	json_object_clear(dmPort);
+	json_object_clear(address);
+	json_object_clear(port);
+	json_object_clear(root);
+
+	std::cout << "data manager: " << dmUri_ << ":" << dmPort_ << std::endl;
+
+}
+
 
 } // namespace server
 } // namespace http

@@ -20,6 +20,7 @@
 #include "../ResourceManagement/SegmentInformation.h"
 #include "../ResourceManagement/ProcessingRuleContainer.h"
 
+
 namespace http {
 namespace server {
 
@@ -29,7 +30,7 @@ class server
 {
 public:
   /// Construct the server to listen on the specified TCP address and port
-  explicit server(const std::string& address, const std::string& port, SegmentInformation* s, ProcessingRuleContainer* c);
+  explicit server(SharedQueue<SegmentInformation*>* s, ProcessingRuleContainer* c);
 
   /// Run the server's io_service loop.
   void run();
@@ -39,9 +40,7 @@ public:
 
 private:
 
-  //port
-  std::string listenPort;
-  /// Handle completion of an asynchronous accept operation.
+   /// Handle completion of an asynchronous accept operation.
   void handle_accept(const boost::system::error_code& e);
 
   /// Handle a request to stop the server.
@@ -58,19 +57,30 @@ private:
 
   /// The next connection to be accepted.
   connection_ptr new_connection_;
-
   /// The handler for all incoming requests.
   request_handler request_handler_;
 
-  bool bBinded;
-
   SegmentInformation* currentSegment;
+
+  SharedQueue<SegmentInformation*>* segmentQueue;
 
   ProcessingRuleContainer* ruleManager;
 
+  bool bBinded;
+
   boost::asio::ip::tcp::endpoint endpoint;
 
+  //port
+  std::string listenPort;//private VM TCP port listening for connection from mobile
+  std::string host_;//uri of private VM
+
+  std::string dmUri_;
+  std::string dmPort_;
+
   bool bindTCPPort();
+
+  void loadConfiguration();
+
 };
 
 } // namespace server

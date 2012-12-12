@@ -16,7 +16,7 @@
 
 #include "../ResourceManagement/SegmentInformation.h"
 #include "../ResourceManagement/ProcessingRuleContainer.h"
-
+#include "../ImageProcessing/SharedQueue.h"
 #include <iostream>
 #include <istream>
 #include <ostream>
@@ -37,10 +37,13 @@ public:
 
 	/// Handle a request and produce a reply.
 	void handle_request(const request& req, reply& rep);
-	void configure(SegmentInformation* s, ProcessingRuleContainer* p);
+	void configure(const std::string host, const std::string port, SharedQueue<SegmentInformation*>* s, ProcessingRuleContainer* p);
 
 private:
-	SegmentInformation* newSegment;
+	//SegmentInformation* newSegment;
+	std::map<std::string, SegmentInformation*> segmentMap;
+	SharedQueue<SegmentInformation*> *segmentList;
+
 	ProcessingRuleContainer* ruleManager;
 
 	//function called when mobile device wants to get the metadata of a resource
@@ -53,15 +56,17 @@ private:
 	/// invalid.
 	static bool url_decode(const std::string& in, std::string& out);
 
+	int getSourceType(const request& req);
 
 	std::string host_;
 	int port_;
-	std::string user_id;
+	bool bE2EPerfTest;
 
-
-
-	void parseRuleFromReq(std::string req);
+	void parseRuleFromReq(const request& req);
 	void addOneRule(json_t* rules);
+	void addLocationRule(json_t* params, PROCESSING_RULE& rule);
+	void addTimeRule(json_t* params, PROCESSING_RULE& rule);
+	void addContentRule(json_t* params, PROCESSING_RULE& rule);
 
 };
 
