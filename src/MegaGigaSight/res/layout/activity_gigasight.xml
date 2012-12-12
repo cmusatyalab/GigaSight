@@ -1,0 +1,222 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp" >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/layout_videocontrol"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp" >
+    </RelativeLayout>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/layout_videocontrol"
+        android:layout_below="@id/layout_videocontrol"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/my_border"
+        android:padding="2dp" >
+
+        <TextView
+            android:id="@+id/label_personalvm_ip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/label_personalvm_ip" />
+
+        <EditText
+            android:id="@+id/personalvm_ip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/label_personalvm_ip"
+            android:layout_below="@+id/label_personalvm_ip"
+            android:hint="@string/personalvm_default_ip"
+            android:inputType="phone"
+            android:singleLine="true" >
+
+            <requestFocus />
+        </EditText>
+
+        <TextView
+            android:id="@+id/label_personalvm_restport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/personalvm_ip"
+            android:text="@string/label_personalvm_restport" />
+
+        <EditText
+            android:id="@+id/personalvm_restport"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/label_personalvm_restport"
+            android:layout_below="@id/label_personalvm_restport"
+            android:hint="@string/personalvm_default_restport"
+            android:inputType="number"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/label_personalvm_uploadport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/personalvm_restport"
+            android:text="@string/label_personalvm_uploadport" />
+
+        <EditText
+            android:id="@+id/personalvm_uploadport"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/label_personalvm_uploadport"
+            android:layout_below="@id/label_personalvm_uploadport"
+            android:hint="@string/personalvm_default_uploadport"
+            android:inputType="number"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/label_devno"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/personalvm_uploadport"
+            android:layout_below="@id/personalvm_uploadport"
+            android:layout_centerVertical="true"
+            android:text="@string/label_devno" />
+        
+        <EditText
+            android:id="@+id/devno"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/personalvm_uploadport"
+            android:layout_toRightOf="@id/label_devno"
+            android:ems="10"
+            android:hint="@string/devno"
+            android:inputType="number"
+            android:singleLine="true" />
+        
+         <TextView
+            android:id="@+id/label_totaldev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/devno"
+            android:layout_below="@id/personalvm_uploadport"
+            android:layout_centerVertical="true"
+            android:text="@string/label_totaldev" />
+         
+         <EditText
+            android:id="@+id/totaldev"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/personalvm_uploadport"
+            android:layout_toRightOf="@id/label_totaldev"
+            android:ems="10"
+            android:hint="@string/devno"
+            android:inputType="number"
+            android:singleLine="true" />
+         
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/totaldev"
+    android:orientation="horizontal">
+    <RadioButton android:id="@+id/radio_random"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/random"
+        android:onClick="onRadioButtonClicked"/>
+    <RadioButton android:id="@+id/radio_slotted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/slotted"
+        android:onClick="onRadioButtonClicked"/>
+</RadioGroup>
+
+        
+    </RelativeLayout>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/layout_videocontrol"
+        android:layout_marginTop="20dp"
+        android:padding="5dp" >
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/button_480p_300s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="33dp"
+        android:onClick="startChunkUpload"
+        android:text="@string/button_480p_300s" />
+
+    <Button
+        android:id="@+id/button_480p_30s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_480p_300s"
+        android:layout_alignLeft="@+id/relativeLayout1"
+        android:onClick="startChunkUpload"
+        android:text="@string/button_480p_30s" />
+
+    <Button
+        android:id="@+id/button_480p_5s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_480p_30s"
+        android:layout_alignLeft="@+id/button_480p_30s"
+        android:onClick="startChunkUpload"
+        android:text="@string/button_480p_5s" />
+
+    <Button
+        android:id="@+id/button_1080p_5s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button_480p_5s"
+        android:layout_alignBottom="@+id/button_480p_5s"
+        android:layout_alignRight="@+id/relativeLayout1"
+        android:onClick="startChunkUpload"
+        android:text="@string/button_1080p_5s" />
+
+    <Button
+        android:id="@+id/button_1080p_30s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_480p_300s"
+        android:layout_alignRight="@+id/button_1080p_5s"
+        android:onClick="startChunkUpload"
+        android:text="@string/button_1080p_30s" />
+
+    <Button
+        android:id="@+id/button_1080p_300s"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button_480p_300s"
+        android:layout_alignBottom="@+id/button_480p_300s"
+        android:layout_alignRight="@+id/button_1080p_30s"
+        android:onClick="startChunkUpload"
+        android:text="@string/button_1080p_300s" />
+    
+    <Button
+        android:id="@+id/button_stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       	android:layout_below="@id/button_1080p_300s"
+        android:onClick="stopChunkUpload"
+        android:text="@string/stop" />
+
+</RelativeLayout>
