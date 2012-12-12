@@ -1,0 +1,106 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/label_defaultprivacypolicy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_defaultprivacypolicy"
+        android:textSize="18sp"
+        tools:context=".PrivacySettingsActivity" />
+
+    <RadioGroup
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/radio_publish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="changeDefaultPolicy"
+            android:checked="true"
+            android:text="@string/publish" />
+
+        <RadioButton
+            android:id="@+id/radio_blank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="changeDefaultPolicy"
+            android:text="@string/blank" />
+    </RadioGroup>
+
+        <TextView
+        android:id="@+id/label_rules"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_rules"
+        android:textSize="18sp"
+        tools:context=".PrivacySettingsActivity" />
+    
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/button_addcontentrule"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="startConstraintDialog"
+            android:text="@string/button_addcontentrule" />
+
+        <Button
+            android:id="@+id/button_addtimerule"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="startConstraintDialog"
+            android:text="@string/button_addtimerule" />
+
+        <Button
+            android:id="@+id/button_addlocationrule"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_addlocationrule"
+            android:onClick="startConstraintDialog" />
+    </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         android:gravity="center_horizontal"        
+        android:orientation="horizontal" >
+    
+    <Button
+        android:id="@+id/button_deleteallrules"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_deleteallrules" 
+		android:onClick="deleteAllRules" />
+    </LinearLayout>
+    
+
+    <ScrollView
+        android:id="@+id/rules_scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true"
+        android:background="@drawable/my_border"
+        android:scrollbars="vertical" >
+
+        <TextView
+            android:id="@+id/rules_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/norules" />
+    </ScrollView>
+
+</LinearLayout>

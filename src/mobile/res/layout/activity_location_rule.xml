@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="16dp" >
+        
+    
+    <LinearLayout
+        android:id="@+id/map_controls"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_locationdone"       
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/label_radius"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_radius"
+            android:textSize="18sp" />
+        
+        <EditText
+            android:id="@+id/radius"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:text="@string/default_radius"
+            android:singleLine="true" />
+        
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_locationdone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:text="@string/save" />
+    
+        <com.google.android.maps.MapView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/mapview"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/map_controls"
+        android:apiKey="0I6vSnJnbLj9tRw1qhnaTXOQiFOcQB6sGRSyDnA"
+        android:clickable="true" />
+    
+    
+</RelativeLayout>

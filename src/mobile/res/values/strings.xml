@@ -1,0 +1,40 @@
+<resources>
+
+    <string name="app_name">GigaSight</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_gigasight">GigasightActivity</string>
+    <string name="button_capture_video">Capture Video</string>
+    <string name="button_livefeed">Live Feed</string>
+    <string name="button_privacy">Privacy Settings</string>
+    <string name="label_personalvm_ip">PersonalVM IP</string>
+    <string name="label_personalvm_restport">Personal VM REST port</string>
+    <string name="personalvm_default_ip">128.2.213.15</string>
+    <string name="personalvm_default_restport">12345</string>
+    <string name="title_activity_privacy_settings">PrivacySettingsActivity</string>
+    <string name="label_defaultprivacypolicy">Default Privacy Policy</string>
+    <string name="publish">Publish</string>
+    <string name="blank">Blank</string>
+    <string name="label_rules">Privacy rules</string>
+    <string name="norules">Currently no rules defined</string>
+    <string name="button_addcontentrule">Content</string>
+    <string name="button_deleteallrules">Clear all rules</string>
+    <string name="button_addtimerule">Time</string>
+    <string name="button_addlocationrule">Location</string>
+    <string name="dialog_pick_faces">Select faces to blur</string>
+    <string name="cancel">Cancel</string>
+    <string name="blur">Blur</string>
+
+    <string-array name="pick_faces"></string-array>
+
+    <string name="dialog_settime">Set time period</string>
+    <string name="title_activity_capture">CaptureActivity</string>
+    <string name="personalvm_default_uploadport">55555</string>
+    <string name="label_personalvm_uploadport">Personal VM upload port</string>
+    <string name="title_activity_location_rule">LocationRuleActivity</string>
+    <string name="label_radius">Radius (m)</string>
+    <string name="default_radius">50</string>
+    <string name="save">Save</string>
+    <string name="dialog_pick_resolution">Choose the resolution</string>
+
+</resources>
