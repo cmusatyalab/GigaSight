@@ -75,6 +75,7 @@ public class LocationRuleActivity extends MapActivity {
 			public void onClick(View v) {
 				saveRules();
 				Intent intent = new Intent(LocationRuleActivity.this,PrivacyActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //to avoid that we come back to this activity when pressing back button
 				startActivity(intent);
 			}			
 		});		

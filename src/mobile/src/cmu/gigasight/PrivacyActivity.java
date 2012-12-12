@@ -101,5 +101,5 @@ public class PrivacyActivity extends Activity {
     void updatePrivacyView(){
     	//update the view to show the new rule to the user
     	rulesView.setText(p.createFormattedText());   	
-    }
+    }    
 }
