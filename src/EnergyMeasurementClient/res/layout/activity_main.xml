@@ -1,0 +1,218 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="10dp" 
+    android:keepScreenOn="true"
+	 >
+	
+    <RelativeLayout
+        android:id="@+id/layout_nodesettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/my_border"
+        android:padding="10dp" >
+
+        <TextView
+            android:id="@+id/label_nodename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="20dp"
+            android:text="@string/label_nodename"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/nodename"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/label_nodename"
+            android:text="@string/unknown"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/label_nodeip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/label_nodename"
+            android:text="@string/label_nodeip"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/nodeip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/nodename"
+            android:layout_toRightOf="@id/label_nodename"
+            android:text="@string/unknown"
+            android:textSize="15sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_serversettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/layout_nodesettings"
+        android:layout_margin="10dp"
+        android:background="@drawable/my_border"
+        android:padding="10dp"
+        android:textSize="15sp" >
+
+        <TextView
+            android:id="@+id/label_expman_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/expman_ip"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="25dp"
+            android:text="@string/label_expman_ip"
+            android:textSize="15sp" />
+
+        <EditText
+            android:id="@id/expman_ip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/label_expman_ip"
+            android:inputType="phone"
+            android:imeOptions="actionDone"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/label_expman_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/expman_port"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/label_expman_ip"
+            android:text="@string/label_expman_port"
+            android:textSize="15sp"
+            android:windowSoftInputMode="stateHidden" />
+
+        <EditText
+            android:id="@id/expman_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/expman_ip"
+            android:layout_below="@id/expman_ip"
+            android:inputType="number"
+            android:imeOptions="actionDone"
+            android:textSize="15sp"
+             />
+
+        <TextView
+            android:id="@+id/label_upload_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/expman_port"
+            android:text="@string/label_upload_ip"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/upload_ip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/label_upload_ip"
+            android:layout_alignBottom="@+id/label_upload_ip"
+            android:layout_toRightOf="@id/label_expman_ip"
+            android:text="@string/unknown"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/label_upload_port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/label_upload_ip"
+            android:text="@string/label_upload_port"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/upload_port"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/label_upload_port"
+            android:layout_alignBottom="@+id/label_upload_port"
+            android:layout_toRightOf="@+id/label_expman_ip"
+            android:text="@string/unknown"
+            android:textSize="15sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_connectButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/layout_serversettings"
+        android:textSize="15sp" >
+
+        <Button
+            android:id="@+id/buttonConnect"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"            
+            android:layout_centerVertical="true"
+            android:onClick="connectToExpController"
+            android:text="Connect" />
+        
+        <Button
+            android:id="@+id/buttonQuit"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/buttonConnect"            
+            android:layout_centerVertical="true"
+            android:onClick="quit"
+            android:text="Quit" />
+        
+            
+
+        <TextView
+            android:id="@+id/colorView"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/buttonQuit"
+            android:layout_marginLeft="15dp"
+			android:layout_marginRight="15dp"
+            android:background="#ff0000" />
+
+    </RelativeLayout>
+
+
+
+        <ScrollView
+            android:id="@+id/layout_status"            
+            android:layout_width="match_parent"            
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"            
+            android:layout_below="@id/layout_connectButton"
+            android:layout_margin="10dp"
+            android:background="@drawable/my_border"
+            android:fillViewport="true"        
+             >
+           
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:gravity="left|top" 
+                android:scrollbars="vertical"                
+                android:textSize="15sp" />
+        </ScrollView>
+
+
+</RelativeLayout>
