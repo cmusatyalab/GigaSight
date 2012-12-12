@@ -38,6 +38,11 @@ public:
 			return NULL;
 	}
 
+	std::list<Data>& getParamList(){
+
+		return paramList;
+
+	}
 
 	void addDescription(std::string& s){
 		description = s;

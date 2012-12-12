@@ -47,7 +47,7 @@ public:
     return boost::make_tuple(result, begin);
   }
 
-  void parseBody(request& req, const char* dataPtr, int contentLength);
+  bool parseBody(request& req, const char* dataPtr, int contentLength);
 
 private:
   /// Handle the next character of input.

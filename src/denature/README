@@ -3,3 +3,146 @@ Copyright (C) 2011-2012 Carnegie Mellon University
 
 This is a developing project and some features might not be stable yet.
 Please visit our website at <http://elijah.cs.cmu.edu/>.
+
+
+After compiling, remember to copy XMLFiles/ folder to Debug/ or Release/. XMLFiles/ contains the config.xml and the classifiers needed for face detection and recognition.
+ * Examples:
+ * 1) ./VideoDenaturing 2 0 /mnt/segments/Videos/1080p/events 5000
+ * decode the first 5000 frames of each video under /mnt/segments/Videos/1080p/events.
+ * If want to decode all the frames, replace 5000 with -1.
+ * 2) ./VideoDenaturing 2 2 /mnt/segments/Videos/1080p/events/ 5000 1
+ * Run decoding, denaturing and encoding in sequence. In this case, face detection starts after all the decoded frames have been pushed to the rawImageQueue.
+ * Due to the limit of memory size, we try not to run more than 100 frames. Here, we process the first 5000 frames, but we can set decoding_sample_rate to 100 in config.xml.
+ * If you want to scale down the video resolution for denaturing, replace 1 with 2, 3 or other values.
+ * 3) ./VideoDenaturing 2 3 /mnt/segements/Videos/1080p/events/ 5000 2
+ * Run decoding, denaturing and encoding threads in parallel. The encoded file will be written to a MP4 file. If the NFS path is not available, it will just save to test under Debug/.
+ * 4) ./VideoDenaturing 2 5 /mnt/segments/Videos/1080p/events/
+ * encrypt all the files in the given folder. For each file, one encrypted file, one key file will be generated.
+ * 5) ./VideoDenaturing 2 6 /mnt/segments/Videos/1080p/events/video1.mp4 keyFile
+ * decrypt video1.mp4. The key is saved in keyFile.
+ * 6) ./VideoDenaturing 2 7 Log/ result
+ * read all the detection_stat_* files and write records into a file called result.
+ * 7) ./VideoDenaturing 2
+ * Just run it and set the number of denaturing threads to 2.
+ * 8) ./VideoDenaturing 2 /mnt/segments/Videos/1080p/events 5000 0
+ * For end-to-end perf test. One thread is emulating mobile client which sends REST msgs. When the segmentID, streamID are available, the personal VM will read one file from the given folder.
+ * 2 here represents the number of denaturing threads, 5000 represents how many frames of each vides should be processed. 0 is just to state that it is for e2e test.
+
+
+
+
+
+Changes:
+
+0) Versions newer than VideoDenaturing12112012 supports two kinds of face detection. For each frame, both haarcascade_frontalface_alt.xml and haarcascade_profile_face.xml will be loaded and used for face detection.The first one is good for detecting front faces.
+
+You can set the sample rate in XMLFile/config.xml. e.g., if you set DECODING_SAMPLE_RATE to 100, it means that the first frame of every 100 frames will be processed. It is by default set to 1.
+
+1) Versions older than VideoDenaturing31102012 have bugs in HTTPServer. The HTTPServer could not handle segmented packets. The bugs are fixed in VideoDenaturing31102012.
+
+2) The latest version supports multiple ImageProcessing(face detection and recognition) threads to run in parallel. They all read frames from a queue and write to another shared queue. The encoding thread will re-ordering the frames before writing into a file. In the latest version, each shared queue includes std::pair<int, cv::Mat> instances instead of cv::Mat instances.
+
+usage: ./VideoDenaturing 2
+means 2 concurrent threads for ImageProcessing. 
+
+There will still be one thread for video decoding, and one thread for video encoding.
+
+
+3) For performance test,
+
+>./VideoDenaturing [number_of_thread] [type_of_test] [test_file_path] [number_of_frame_to_process] [scale] [name_list_for_recognition]
+
+type_of_test:  
+
+0 is for decoding only;
+2 is for decoding, denaturing and encoding in sequence.This is used for measuring the throughput of each component.
+3 is for decoding, processing and encoding in parallel. 
+
+When type_of_test is set to 1 or 2, if the name_list_for_recognition is not empty, face recognition will be enabled. 
+
+name_list_for_recognition:  e.g. "Pieter;Satya;"
+
+number_of_frame_to_process: the program will only process the first N frames.If the value is set to -1, it will process all the frames.
+
+For example,
+>./VideoDenaturing 1 0 /mnt/Videos/360p/ -1
+
+scale: if it is set to 2, 1920x1080 will be scaled down to 920x540 for face detection. 
+
+
+4) minArea() for face detection can be configured by editting XMLFiles/config.xml.
+
+e.g.
+"MIN_AREA":20, means the minarea is set to cv::Size(20,20)
+
+5) The latest version also support perf test for encryption and decryption.
+
+For example,
+./VideoDenaturing 2 5 /mnt/segments/Videos/1080p/events/ outputFileName
+
+It will encrypt all the files under the given directory. If the source file is video.mp4, the encrypted video is saved to video.mp4_encrypted by default. The private key generated during encryption will be saved in a separate file name video.mp4_encrypted_key.
+
+./VideoDenaturing 2 6 video_encrypted video_encrypted_key
+
+for decryption.
+
+6) If you run multiple denaturing threads in parallel, each thread generates a log file. You can run
+
+./VideoDenaturing 2 7 logFolder/ result
+to process the data saved in logFolder. Basically it reads the log from each detection_stat_* file and write all the data to the 'result' file.
+
+Status:
+
+
+1) Debug/XMLFiles/lbph : trained from 5 persons' photos (Pieter, Babu, Kiryong, Yu, and Zhuo). Each person has 10 photos (320(W)*240(H)).
+
+
+2) It can write original video without transcoding and gps stream to NFS directly.Denatured video are written to NFS. 
+
+In opencv2.4.2, in total five types of codecs are supported by VideoWriter. But for the video generated by Android Nexus, only CV_FOURCC('X', 'V', 'I', 'D') and CV_FOURCC('H', 'F', 'Y','U') are supported. Because the file size of the first one is smaller, we use the first one in the current version.
+
+3) The framerate read directly from the video generated by Android is not correct. It always shows 30fps, but the actually framerate is lower. In the latest version, we use duration/framecount to calculate real framerate and use that for encoding and can get the right duration. Otherwise,the video length is much smaller than the original one.
+
+4) The latest version also includes the code for time-based and location-based filtering. 
+
+If location or time filter is set by user, only when the frames that were taken in the certain area or in a certain time range will be blurred. 
+
+These two kinds of rules have been tested separately. 
+
+5) The accuracy of face recognition is hard to estimate. In the latest version, only when the mobile define content-based filtering will the face recognition be activated. Otherwise, only face detection is activated, and all the detected face will be blurred.
+So far, LBPH provides the best performance, compared with FISHER and EIGEN.
+
+6) Images used for face recognizor training must have exactly the same size (width, height in pixels) with the frames taken from mobile phones. In the latest version, the trained images are of the size of 320(W)*240(H). 
+
+7) XMLFiles/config.json:  You can set the face recognition algorithm (FISHER, LBPH, EIGEN), the size of trained images there. Remember that the values of trained image width/height are of type of integer. 
+
+8) TestFiles/label.json:  Label is equal to the name of each folder containing photos for training. Label is of type of integer, not string.
+
+9) Face detection: if no face is detected, it will try to rotate the frame for 90 degress and detect again, but only try once more.
+
+
+
+NOTE:
+
+1) IN VideoDenaturing/Debug/XMLFiles/config.json
+PRIVATE_VM_IP must be set to the IP of the VM, not the host. So it should besomething like 192.168.122.172.
+
+On mobile phone, the IP address of the privateVM is set to the host IP, 128.2.213.15.
+
+2) Two XML files required for face detection are stored under XMLFiles/
+
+3) Images (faces) used for training face recognition algorithm are saved in TestFiles/. Images for each person are saved in separate folders. The folder is named with an integer label. The mapping between label and name(string) is written in label.json.
+
+All the detected faces will be blured if the mobile user does not specify a list of names. The mobile user can choose whose faces should be blured. The setting can be done by sending /privacy requests to the privateVM.
+
+This program supports 3 different recognition algorithms. Currently, only the one called FISHER is in use.
+
+4) libboost1.46, opencv2.4.2 and jansson are needed.
+
+
+5) To run the application, just go to VideoDenaturing/Debug/
+>./VideoDenaturing
+
+6) We assume that the mobile will send the POST for creating new GPS stream ID before sending the one for Video, if GPS information is available. This is to ease the section management in privateVM.
+
+7) In the latest version, the threads which are responsible for receiving video/gps streames will forward an SegmentInformation* with indicator = FILE_UPLOADED to the decoding thread. The request_handler will forward another SegmentInformation* to the decoding thread when it has received the PUT messages (updating duration and stattime). The decoding will start after receiving both files and the file information. It is because the imageprocessing starts when decoding starts, although decoding can run without file information, but imageprocessing requires file information for location/time filtering.  

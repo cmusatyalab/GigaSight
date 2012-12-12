@@ -25,6 +25,12 @@ StreamInformation::StreamInformation(const std::string segID, STREAM_OUTPUT_TYPE
 	status = INITIATED;
 	currentCount = 0;
 	lastUpdatedCount = 0;
+
+	sFSPath = "";
+	sLocalPath = "";
+	duration = 0;
+	startTimestamp = "";
+
 }
 
 void StreamInformation::addTag(std::string& tag){
@@ -37,7 +43,7 @@ void StreamInformation::setStreamID(std::string& id){
 }
 
 
-std::string& StreamInformation::getStreamID(){
+std::string StreamInformation::getStreamID(){
 
 	return stream_id;
 
@@ -65,9 +71,14 @@ void StreamInformation::setOutputType(STREAM_OUTPUT_TYPE t){
 	outputType = t;
 }
 
-std::string& StreamInformation::getFilePath(){
+std::string StreamInformation::getFilePath(){
 	return sFSPath;
 	
+}
+
+std::string StreamInformation::getLocalFilePath(){
+	return sLocalPath;
+
 }
 
 
@@ -93,6 +104,48 @@ int StreamInformation::getInputVideoCodec(){
 	return codecCode;
 }
 
-void StreamInformation::setFilePath(std::string& s){
-	sFSPath = s;
+void StreamInformation::setFilePath(const std::string s){
+	sFSPath.assign(s.c_str());
+}
+
+void StreamInformation::setLocalFilePath(std::string s){
+	sLocalPath.assign(s.c_str());
+}
+
+
+void StreamInformation::setSegmentID(const std::string s){
+	segment_id.assign(s.c_str());
+
+}
+
+
+std::string StreamInformation::getSegmentID(){
+	return segment_id;
+}
+
+
+void StreamInformation::setDuration(const double d){
+	duration = d;
+
+}
+
+double StreamInformation::getDuration(){
+	return duration;
+}
+
+
+void StreamInformation::setStartTime(const std::string s){
+	startTimestamp.assign(s.c_str());
+}
+
+std::string StreamInformation::getStartTime(){
+	return startTimestamp;
+}
+
+int StreamInformation::getFrameCount(){
+	return frameCount;
+}
+
+void StreamInformation::setFrameCount(const int i){
+	frameCount = i;
 }

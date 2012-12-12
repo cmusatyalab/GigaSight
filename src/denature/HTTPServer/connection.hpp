@@ -73,6 +73,9 @@ private:
 
   /// The reply to be sent back to the client.
   reply reply_;
+
+  std::string partStr;
+  int receivedBytes;
 };
 
 typedef boost::shared_ptr<connection> connection_ptr;

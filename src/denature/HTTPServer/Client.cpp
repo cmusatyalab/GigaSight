@@ -36,9 +36,9 @@ bool Client::requestForSegment(const std::string& host_, const unsigned short po
 
 		endpoint= *(resolver_.resolve(query));
 
-	}catch (boost::system::system_error e){
+	}catch (boost::system::system_error& e){
 
-		std::cout << e.what() << std::endl;
+		std::cout << "cannot resolve the host" << e.what() << std::endl;
 		return false;
 	}
 
@@ -46,9 +46,11 @@ bool Client::requestForSegment(const std::string& host_, const unsigned short po
 	//reset port number. otherwise, it would be 80
 	endpoint.port(port_);
 
+	//std::cout << "connecting to data manager port:" << endpoint.port() << std::endl;
+
 	try{
 		socket_.connect(endpoint);
-	}catch (boost::system::system_error e){
+	}catch (boost::system::system_error& e){
 
 		std::cout << e.what() << std::endl;
 		return false;
@@ -62,7 +64,7 @@ bool Client::requestForSegment(const std::string& host_, const unsigned short po
 
 	char* jsonStr = json_dumps(root, 0);
 
-	std::cout << jsonStr << std::endl;
+
 
 	// Form the request. We specify the "Connection: close" header so that the
 	// server will close the socket after transmitting the response. This will
@@ -78,12 +80,19 @@ bool Client::requestForSegment(const std::string& host_, const unsigned short po
 
 	request_stream << jsonStr << "\r\n\r\n";
 
-	std::cout << &request_stream;
+	std::cout << "segment request sent to dm"<< jsonStr << std::endl;
 
 
-	boost::asio::write(socket_, request_);
+	try{
+		boost::asio::write(socket_, request_);
 
-	boost::asio::read_until(socket_, response_, "\r\n");
+		boost::asio::read_until(socket_, response_, "\r\n");
+
+	}catch (boost::system::system_error& e){
+
+		std::cout << e.what() << std::endl;
+		return false;
+	}
 
 	//check status line
 	std::istream response_stream(&response_);
@@ -101,28 +110,38 @@ bool Client::requestForSegment(const std::string& host_, const unsigned short po
 	response_stream >> status_code;
 
 	std::cout << "Response returned with status code " << status_code << std::endl;
-	boost::asio::read_until(socket_, response_, "\r\n\r\n");
 
-	boost::system::error_code error;
-
-	//read body
-	boost::asio::read(socket_, response_, boost::asio::transfer_all(), error);
 
 	std::ostringstream response;
+
+	boost::system::error_code error;
+	boost::asio::read(socket_, response_, boost::asio::transfer_all(), error);
+
 	response << &response_;
 
-	std::cout << "body:\n" << response.str().c_str();
+
+	std::string body;
+
+	std::cout << "headers:\n"<< response.str() << std::endl;
+
+	size_t i = response.str().find("{");
+
+	if (i != response.str().npos){
+		body = response.str().substr(i, response.str().size());
+	}
+
+	std::cout << "body:\n" << body << std::endl;
 
 	json_t* responseRoot = NULL;
 
 	json_error_t err_t;
 	json_t* filePath;
 
-	responseRoot = json_loads(response.str().c_str(), 0, &err_t);
+	responseRoot = json_loads(body.c_str(), 0, &err_t);
 
 	if (responseRoot == NULL){
 
-		std::cout << "cannot load" << std::endl;
+		std::cout << "cannot load the response body" << std::endl;
 
 		return false;
 	}
@@ -146,20 +165,20 @@ bool Client::requestForSegment(const std::string& host_, const unsigned short po
 	}
 
 	return true;
-	//async client
-	//resolver_.async_resolve(query, boost::bind(&Client::handle_resolve, this,boost::asio::placeholders::error,boost::asio::placeholders::iterator));
 
 }
 
 
-//type: 0: original video  1: denatured video
+//type: 0: original video  1: denatured video 2: GPS
 bool Client::requestForStream(const std::string& host_, const unsigned short port_, const http::server::request& req, int type, std::string& uri, std::string& path){
 
 	//new stream
-	std::string segID = req.uri;
+	//std::string segID = req.uri.substr(9, req.uri.size()-9);
+	std::string dmSegID = "/api/dm"+req.uri;
+	std::cout << dmSegID << std::endl;
 	json_t* request = json_object();
 
-	json_object_set_new(request, "segment", json_string(segID.c_str()));
+	json_object_set_new(request, "segment", json_string(dmSegID.c_str()));
 
 	json_error_t err_t;
 	json_t* root = json_loads(req.body.c_str(), 0, &err_t);
@@ -169,22 +188,33 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 
 	json_t* container = json_object_get(root, "container");;
 
+	std::string description;
+
 	if (container != NULL){
-		json_object_set_new(request, "container", json_string(json_string_value(container)));
+		description.assign(json_string_value(container));
+		description.append(";");
 	}
+	else
+		description = "";
+
 
 	switch(type){
 	case 0:
 		//original
-		json_object_set_new(request, "tag", json_string("original"));
+		//json_object_set_new(request, "tag", json_string("original"));
+		description.append("video;original;public;");
 		break;
 	case 1:
-		json_object_set_new(request, "tag", json_string("denatured"));
+		//json_object_set_new(request, "tag", json_string("denatured"));
+		description.append("video;denatured;public;");
 		break;
 	case 2:
-		json_object_set_new(request, "tag", json_string("frames"));
+		//json_object_set_new(request, "tag", json_string("frames"));
+		description.append("gps;original;public;");
 		break;
 	}
+
+	json_object_set_new(request, "stream_description", json_string(description.c_str()));
 
 	char* jsonStr = json_dumps(request, 0);
 
@@ -204,7 +234,7 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 
 		endpoint= *(resolver_.resolve(query));
 
-	}catch (boost::system::system_error e){
+	}catch (boost::system::system_error& e){
 
 			std::cout << e.what() << std::endl;
 			return false;
@@ -216,15 +246,16 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 
 	try{
 			socket_.connect(endpoint);
-	}catch (boost::system::system_error e){
+	}catch (boost::system::system_error& e){
 
 		std::cout << e.what() << std::endl;
 		return false;
 	}
 
 
+
 	std::ostream request_stream(&request_);
-	request_stream << "POST " << "/api/dm/stream"<< " HTTP/1.1\r\n";
+	request_stream << "POST " << "/api/dm/stream/"<< " HTTP/1.1\r\n";
 	request_stream << "Host: " << host_ << ":" << port_ << "\r\n";
 	request_stream << "Accept-Encoding: identity\r\n";
 	request_stream << "Content-Length: "<< std::string(jsonStr).length()<< "\r\n";
@@ -234,12 +265,19 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 
 	request_stream << jsonStr << "\r\n\r\n";
 
-	std::cout << &request_stream;
+	std::cout << "sent to dm" << jsonStr;
 
 
-	boost::asio::write(socket_, request_);
+	try{
 
-	boost::asio::read_until(socket_, response_, "\r\n");
+		boost::asio::write(socket_, request_);
+
+		boost::asio::read_until(socket_, response_, "\r\n");
+	} catch(boost::system::system_error& e){
+
+		std::cout << e.what() << std::endl;
+		return false;
+	}
 
 	//check status line
 	std::istream response_stream(&response_);
@@ -257,24 +295,40 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 	response_stream >> status_code;
 
 	std::cout << "Response returned with status code " << status_code << std::endl;
-	boost::asio::read_until(socket_, response_, "\r\n\r\n");
-
-	boost::system::error_code error;
-
-	//read body
-	boost::asio::read(socket_, response_, boost::asio::transfer_all(), error);
 
 	std::ostringstream response;
+
+	boost::system::error_code error;
+	boost::asio::read(socket_, response_, boost::asio::transfer_all(), error);
+
 	response << &response_;
 
-	std::cout << "body:\n" << response.str().c_str();
+
+	//boost::asio::read_until(socket_, response_, "\r\n\r\n");
+
+	//std::ostringstream response;
+	//response << &response_;
+	std::string headers, body;
+
+	headers = response.str();
+	//response_stream >> headers;
+
+	std::cout << "headers:\n" << headers << std::endl;
+
+	size_t i = headers.find("{");
+
+	if (i != headers.npos){
+		body = headers.substr(i, headers.size());
+	}
+
+	std::cout << "body:\n" << body << std::endl;
 
 	json_t* responseRoot = NULL;
 
 	json_t* uriNode;
 	json_t* filePathNode;
 
-	responseRoot = json_loads(response.str().c_str(), 0, &err_t);
+	responseRoot = json_loads(body.c_str(), 0, &err_t);
 
 	if (responseRoot == NULL){
 
@@ -284,9 +338,10 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 	}
 
 
-	filePathNode = json_object_get(responseRoot, "file_path");
+	filePathNode = json_object_get(responseRoot, "path");
 	uriNode = json_object_get(responseRoot, "resource_uri");
 
+	//resource_uri = /api/dm/stream/streamID/
 
 	if (uriNode != NULL)
 		uri.assign(json_string_value(uriNode));
@@ -295,6 +350,253 @@ bool Client::requestForStream(const std::string& host_, const unsigned short por
 		path.assign(json_string_value(filePathNode));
 
 	return true;
+
+}
+
+void Client::updateProcessingStatus(const std::string& host_, const unsigned short port_, const std::string streamID, const PROCESSING_STATUS statusCode){
+
+	//update stream information
+	std::string url= "/api/dm/stream" +streamID.substr(streamID.find("/", 9), streamID.size());
+	json_t* request = json_object();
+
+	switch (statusCode){
+	case INITIATED:
+		json_object_set_new(request, "status", json_string("CRE"));
+		break;
+	case PROCESSING:
+		json_object_set_new(request, "status", json_string("UPD"));
+		break;
+	case STOPPED:
+		json_object_set_new(request, "status", json_string("FIN"));
+		break;
+	}
+
+
+	char* jsonStr = json_dumps(request, 0);
+
+
+	//resolve the host name
+	tcp::resolver::query query(host_, "http");
+
+	tcp::endpoint endpoint;
+	boost::asio::io_service io_service_;
+	tcp::socket socket_(io_service_);
+
+
+	try{
+		//currently, we assume only one address will be returned
+
+		tcp::resolver resolver_(io_service_);
+
+		endpoint= *(resolver_.resolve(query));
+
+	}catch (boost::system::system_error& e){
+
+		std::cout << e.what() << std::endl;
+		return;
+	}
+
+	//reset port number. otherwise, it would be 80
+	endpoint.port(port_);
+
+	try{
+			socket_.connect(endpoint);
+	}catch (boost::system::system_error& e){
+
+			std::cout << e.what() << std::endl;
+			return;
+	}
+
+
+	std::ostream request_stream(&request_);
+	request_stream << "PUT " << url << " HTTP/1.1\r\n";
+	request_stream << "Host: " << host_ << ":" << port_ << "\r\n";
+	request_stream << "Accept-Encoding: identity\r\n";
+	request_stream << "Content-Length: "<< std::string(jsonStr).length()<< "\r\n";
+	request_stream << "Content-type: application/json\r\n";
+	//always remember to put "\r\n\r\n" at the end of headers
+	request_stream << "Connection: close\r\n\r\n";
+
+	request_stream << jsonStr << "\r\n\r\n";
+
+	std::cout << "url" << url << "body" << jsonStr << std::endl;
+
+
+	boost::asio::write(socket_, request_);
+
+	boost::asio::read_until(socket_, response_, "\r\n");
+
+	//check status line
+	std::istream response_stream(&response_);
+	std::string http_version;
+	response_stream >> http_version;
+
+	if (!response_stream || http_version.substr(0, 5) != "HTTP/"){
+
+		std::cout << "Invalid response \n";
+		return;
+
+	}
+
+	unsigned int status_code;
+	response_stream >> status_code;
+
+	std::cout << "Response returned with status code " << status_code << std::endl;
+	boost::asio::read_until(socket_, response_, "\r\n\r\n");
+
+}
+
+
+void Client::updateStreamInformation(const std::string& host_, const unsigned short port_, const std::string streamID, std::string body){
+
+	//update stream information
+		std::string url= "/api/dm/stream" +streamID.substr(streamID.find("/", 9), streamID.size());
+
+		//resolve the host name
+		tcp::resolver::query query(host_, "http");
+
+		tcp::endpoint endpoint;
+		boost::asio::io_service io_service_;
+		tcp::socket socket_(io_service_);
+
+
+		try{
+			//currently, we assume only one address will be returned
+
+			tcp::resolver resolver_(io_service_);
+
+			endpoint= *(resolver_.resolve(query));
+
+		}catch (boost::system::system_error& e){
+
+			std::cout << e.what() << std::endl;
+			return;
+		}
+
+		//reset port number. otherwise, it would be 80
+		endpoint.port(port_);
+
+		try{
+				socket_.connect(endpoint);
+		}catch (boost::system::system_error& e){
+
+				std::cout << e.what() << std::endl;
+				return;
+		}
+
+
+		std::ostream request_stream(&request_);
+		request_stream << "PUT " << url << " HTTP/1.1\r\n";
+		request_stream << "Host: " << host_ << ":" << port_ << "\r\n";
+		request_stream << "Accept-Encoding: identity\r\n";
+		request_stream << "Content-Length: "<< body.length()<< "\r\n";
+		request_stream << "Content-type: application/json\r\n";
+		//always remember to put "\r\n\r\n" at the end of headers
+		request_stream << "Connection: close\r\n\r\n";
+
+		request_stream << body << "\r\n\r\n";
+
+		//std::cout << "url" << url << "body" << body << std::endl;
+
+
+		boost::asio::write(socket_, request_);
+
+		boost::asio::read_until(socket_, response_, "\r\n");
+
+		//check status line
+		std::istream response_stream(&response_);
+		std::string http_version;
+		response_stream >> http_version;
+
+		if (!response_stream || http_version.substr(0, 5) != "HTTP/"){
+
+			std::cout << "Invalid response \n";
+			return;
+
+		}
+
+		unsigned int status_code;
+		response_stream >> status_code;
+
+		//std::cout << "Response returned with status code " << status_code << std::endl;
+		boost::asio::read_until(socket_, response_, "\r\n\r\n");
+
+}
+
+
+void Client::updateSegmentInformation(const std::string& host_, const unsigned short port_, const std::string segmentID, std::string body){
+
+	//update stream information
+		std::string url= "/api/dm" +segmentID;
+
+		//resolve the host name
+		tcp::resolver::query query(host_, "http");
+
+		tcp::endpoint endpoint;
+		boost::asio::io_service io_service_;
+		tcp::socket socket_(io_service_);
+
+
+		try{
+			//currently, we assume only one address will be returned
+
+			tcp::resolver resolver_(io_service_);
+
+			endpoint= *(resolver_.resolve(query));
+
+		}catch (boost::system::system_error& e){
+
+			std::cout << e.what() << std::endl;
+			return;
+		}
+
+		//reset port number. otherwise, it would be 80
+		endpoint.port(port_);
+
+		try{
+				socket_.connect(endpoint);
+		}catch (boost::system::system_error& e){
+
+				std::cout << e.what() << std::endl;
+				return;
+		}
+
+
+		std::ostream request_stream(&request_);
+		request_stream << "PUT " << url << " HTTP/1.1\r\n";
+		request_stream << "Host: " << host_ << ":" << port_ << "\r\n";
+		request_stream << "Accept-Encoding: identity\r\n";
+		request_stream << "Content-Length: "<< body.length()<< "\r\n";
+		request_stream << "Content-type: application/json\r\n";
+		//always remember to put "\r\n\r\n" at the end of headers
+		request_stream << "Connection: close\r\n\r\n";
+
+		request_stream << body << "\r\n\r\n";
+
+		//std::cout << "url" << url << "body" << body << std::endl;
+
+
+		boost::asio::write(socket_, request_);
+
+		boost::asio::read_until(socket_, response_, "\r\n");
+
+		//check status line
+		std::istream response_stream(&response_);
+		std::string http_version;
+		response_stream >> http_version;
+
+		if (!response_stream || http_version.substr(0, 5) != "HTTP/"){
+
+			std::cout << "Invalid response \n";
+			return;
+
+		}
+
+		unsigned int status_code;
+		response_stream >> status_code;
+
+		//std::cout << "Response returned with status code " << status_code << std::endl;
+		boost::asio::read_until(socket_, response_, "\r\n\r\n");
 
 }
 /*

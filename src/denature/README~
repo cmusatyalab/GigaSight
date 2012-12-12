@@ -1,0 +1,30 @@
+Elijah: Cloudlet Infrastructure for Mobile Computing
+Copyright (C) 2011-2012 Carnegie Mellon University
+
+This is a developing project and some features might not be stable yet.
+Please visit our website at <http://elijah.cs.cmu.edu/>.
+
+
+After compiling, remember to copy XMLFiles/ folder to Debug/ or Release/. XMLFiles/ contains the config.xml and the classifiers needed for face detection and recognition.
+ * Examples:
+ * 1) ./VideoDenaturing 2 0 /mnt/segments/Videos/1080p/events 5000
+ * decode the first 5000 frames of each video under /mnt/segments/Videos/1080p/events.
+ * If want to decode all the frames, replace 5000 with -1.
+ * 2) ./VideoDenaturing 2 2 /mnt/segments/Videos/1080p/events/ 5000 1
+ * Run decoding, denaturing and encoding in sequence. In this case, face detection starts after all the decoded frames have been pushed to the rawImageQueue.
+ * Due to the limit of memory size, we try not to run more than 100 frames. Here, we process the first 5000 frames, but we can set decoding_sample_rate to 100 in config.xml.
+ * If you want to scale down the video resolution for denaturing, replace 1 with 2, 3 or other values.
+ * 3) ./VideoDenaturing 2 3 /mnt/segements/Videos/1080p/events/ 5000 2
+ * Run decoding, denaturing and encoding threads in parallel. The encoded file will be written to a MP4 file. If the NFS path is not available, it will just save to test under Debug/.
+ * 4) ./VideoDenaturing 2 5 /mnt/segments/Videos/1080p/events/
+ * encrypt all the files in the given folder. For each file, one encrypted file, one key file will be generated.
+ * 5) ./VideoDenaturing 2 6 /mnt/segments/Videos/1080p/events/video1.mp4 keyFile
+ * decrypt video1.mp4. The key is saved in keyFile.
+ * 6) ./VideoDenaturing 2 7 Log/ result
+ * read all the detection_stat_* files and write records into a file called result.
+ * 7) ./VideoDenaturing 2
+ * Just run it and set the number of denaturing threads to 2.
+ * 8) ./VideoDenaturing 2 /mnt/segments/Videos/1080p/events 5000 0
+ * For end-to-end perf test. One thread is emulating mobile client which sends REST msgs. When the segmentID, streamID are available, the personal VM will read one file from the given folder.
+ * 2 here represents the number of denaturing threads, 5000 represents how many frames of each vides should be processed. 0 is just to state that it is for e2e test.
+ 
