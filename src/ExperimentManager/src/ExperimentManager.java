@@ -530,9 +530,15 @@ public class ExperimentManager {
 			// target = (ArrayList<MobileNode>) connectedNodes.clone();
 			// }
 			
-			gui.log("Waiting one more chunk sec to stop experiment...");
+			int waitTime = 0;
+			if(ExperimentConfiguration.chunk_sec == 300){
+				waitTime = 300;
+			}
+			else
+				waitTime = 60;
+			gui.log("Waiting "+waitTime+ "sec to stop experiment...");
 			try {
-				Thread.sleep(ExperimentConfiguration.chunk_sec*1000);
+				Thread.sleep(waitTime*1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -629,7 +635,6 @@ public class ExperimentManager {
 			// start next iteration if needed
 			currentIteration++;
 			if (currentIteration < ExperimentConfiguration.no_iters) {
-				
 				ExperimentManager.this.start();
 			} else /*if (ExperimentConfiguration.experimentType == ExperimentConfiguration.RANDOM_ALLBUTONE_480p
 					|| ExperimentConfiguration.experimentType == ExperimentConfiguration.RANDOM_ALLBUTONE_1080p
@@ -686,6 +691,9 @@ public class ExperimentManager {
 					
 					currentIteration = 0;
 					ExperimentManager.this.start();
+				}
+				else{
+					gui.log("Experiment completely finished!");
 				}
 			}
 
