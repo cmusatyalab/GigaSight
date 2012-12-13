@@ -81,13 +81,20 @@ bash pasteAllThroughput.sh DIR/480p_3_Pittsburhg_5_1 (etc.)
 You can have a look at the Excel files on the data storage to see how you can process these files.
 
 3) The number of bytes received by the cloudlet from a specific node
-This is needed for the energy measurements. It shows how many
-bytes are transmitted in the first 585 seconds of the experiment.  (or 1185 for the 300s experiments were we used 1200 s duration)
-We divide the average power consumed (as measured by the Monsoon) by this number. This was
-the number reported in the submission.
+This is needed for the energy measurements. It calculates how many
+bytes are transmitted in the first 585 seconds of the experiment.  
+You should use the same duration as you have used to measure the energy with the PowerMonitor.
+The ExperimentManager typically takes 15s less than the duration you configure in the GUI.
 
-You will use the script "calculateBytesTransmitted" for this.
-First, change the "filepath" in the script to the path where
+For 5 and 30s, I used a duration of 600 s in the GUI, so the energy was measured during 585 = 600 - 15.
+For 300s, I used a duration of 1200s in the GUI, so the energy was measured during 1185 = 1200 - 15.
+
+To obtain the results reported in the paper, we divide the average power consumed 
+(as measured by the Monsoon) by the number of bytes received by the cloudlet during the same period. 
+This number of bytes can be calculated by the script calculateBytesTransmitted.sh. If you use different
+For 300s, there is a separate script, that calculates for 1185 seconds.
+
+To use the calculateBytesTransmitted scripts, change the "filepath" in the script to the path where
 the log files of TSHARK are stored.
 Second, change 192.168.2.7 to the IP of the phone attached to the Monsoon Power Monitor.
 
