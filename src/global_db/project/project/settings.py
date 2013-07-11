@@ -5,6 +5,9 @@ TEMPLATE_DEBUG = DEBUG
 TASTYPIE_FULL_DEBUG = True
 APPEND_SLASH = False
 
+# Tastypie Settings
+API_LIMIT_PER_PAGE = 0
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
