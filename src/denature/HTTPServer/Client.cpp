@@ -369,6 +369,11 @@ void Client::updateProcessingStatus(const std::string& host_, const unsigned sho
 	case STOPPED:
 		json_object_set_new(request, "status", json_string("FIN"));
 		break;
+    /* TODO: Fill in with proper logic; remove from enum if never used */
+    case WAITING_FOR_INPUT:
+    case PAUSED:
+        break;
+
 	}
 
 
