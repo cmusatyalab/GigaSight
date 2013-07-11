@@ -31,6 +31,9 @@ STREAM_RESOURCE = "/api/dm/stream/"
 TAG_RESOURCE = "/api/dm/tag/"
 SEGMENT_RESOURCE = "/api/dm/segment/"
 
+CLOUD_URL = "http://monsoon.elijah.cs.cmu.edu:9000"
+CLOUD_CLOUDLET = "/api/gm/cloudlet/"
+CLOUD_SEGMENT = "/api/gm/segment/"
 GLOBAL_CLOUDLET_RESOURCE = "/api/gm/cloudlet/"
 GLOBAL_SEGMENT_RESOURCE = "/api/gm/segment/"
 
@@ -135,9 +138,10 @@ def update_to_cloud(cloudlet_url, filter_date):
     global SEGMENT_RESOURCE
     global STREAM_RESOURCE
     global TAG_RESOURCE
-    CLOUD_URL = "http://monsoon.elijah.cs.cmu.edu:9000"
-    CLOUD_CLOUDLET = "/api/gm/cloudlet/"
-    CLOUD_SEGMENT = "/api/gm/segment/"
+
+    global CLOUD_URL
+    global CLOUD_CLOUDLET
+    global CLOUD_SEGMENT
 
     # get global information
     cloud_cloudlet = get_files(CLOUD_URL, CLOUD_CLOUDLET)

@@ -7,3 +7,21 @@ Please visit our website at <http://elijah.cs.cmu.edu/>.
 INSTALL
 -------
 sudo apt-get install libmysqlclient-dev
+
+
+RUN
+-------
+1. run local data manager
+		$ cd project
+		$ ./manage.py runserver 0.0.0.0:5000
+
+2. run global data manager
+		$ cd ../global_db/project/
+		$ ./manage.py runserver 0.0.0.0:9000
+
+3. run DB updater
+		$ cd client
+		$ ./update_to_global.py http://[Cloudlet URL] [sync inteval in sec]
+		ex) ./update_to_global.py http://monsoon.elijah.cs.cmu.edu:5000 10
+
+	
