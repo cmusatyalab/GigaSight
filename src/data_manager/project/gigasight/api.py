@@ -15,7 +15,7 @@ from django.utils import simplejson
 from tastypie.serializers import Serializer
 
 
-NFS_ROOT = "/mnt/segments/"
+NFS_ROOT = "/cloudletstore/segments/"
 
 class PrettyJSONSerializer(Serializer):
     json_indent = 2
