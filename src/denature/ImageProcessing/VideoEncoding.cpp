@@ -631,7 +631,7 @@ bool VideoEncoding::configure(){
 		//outputVideo = new VideoWriter(m_videoFilePath, denaturedVideoStream->getInputVideoCodec(), denaturedVideoStream->getVideoFrameRate(), denaturedVideoStream->getVideoFrameSize(), true);
 
 		std::cout << "frame rate used for encoding is " << denaturedVideoStream->getVideoFrameRate() << std::endl;
-		outputVideo = new VideoWriter(m_videoFilePath, CV_FOURCC('X', 'V', 'I', 'D'), denaturedVideoStream->getVideoFrameRate()/decoding_sample_rate, denaturedVideoStream->getVideoFrameSize(), true);
+		outputVideo = new VideoWriter(m_videoFilePath + ".avi", CV_FOURCC('X', 'V', 'I', 'D'), denaturedVideoStream->getVideoFrameRate()/decoding_sample_rate, denaturedVideoStream->getVideoFrameSize(), true);
 
 		//mpeg4 codec, unsupported
 		//outputVideo = new VideoWriter(m_videoFilePath, CV_FOURCC('D', 'I', 'V', 'X'), denaturedVideoStream->getVideoFrameRate(), denaturedVideoStream->getVideoFrameSize(), true);
