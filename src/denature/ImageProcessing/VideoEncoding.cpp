@@ -603,6 +603,12 @@ bool VideoEncoding::configure(){
 			m_videoFilePath = "test";
 		}
 
+        if (symlink(m_videoFilePath.c_str(),
+                    (m_videoFilePath + ".avi").c_str()))
+        {
+            fprintf(stderr, "--> FAILED CREATING SYMLINK\n");
+        }
+
 		/* opens the file and initializes the video writer.
 		* filename - the output file name.
 		* fourcc - the codec
