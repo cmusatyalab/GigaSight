@@ -20,6 +20,7 @@ def parse(url):
     from urlparse import urlparse
     o = urlparse(url)
     hostname = o.hostname
+    print "host:%s,ip:%s" % (hostname, socket.gethostbyname(hostname))
     return socket.gethostbyname(hostname)
 
 def search(request):    
@@ -63,6 +64,7 @@ def search(request):
     
         if entry_prev != None:
             ip_addr = parse(entry_prev.cloudlet.url_prefix)
+            print ip_addr
             cookies.append(generate_cookie_django(urls,
                                      servers=[ip_addr]))
     
