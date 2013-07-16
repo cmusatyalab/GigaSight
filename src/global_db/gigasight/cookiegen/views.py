@@ -20,8 +20,7 @@ def parse(url):
     from urlparse import urlparse
     o = urlparse(url)
     hostname = o.hostname
-    print "host:%s,ip:%s" % (hostname, socket.gethostbyname(hostname))
-    return socket.gethostbyname(hostname)
+    return hostname
 
 def search(request):    
     req_location = request.GET['location']
