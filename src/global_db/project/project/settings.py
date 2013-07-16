@@ -17,7 +17,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'gigasight',                      # Or path to database file if using sqlite3.
+        'NAME': 'gigasight_global',                      # Or path to database file if using sqlite3.
         'USER': 'cloudlet',                      # Not used with sqlite3.
         'PASSWORD': 'cloudlet',                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
