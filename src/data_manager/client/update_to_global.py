@@ -31,7 +31,7 @@ STREAM_RESOURCE = "/api/dm/stream/"
 TAG_RESOURCE = "/api/dm/tag/"
 SEGMENT_RESOURCE = "/api/dm/segment/"
 
-CLOUD_URL = "http://monsoon.elijah.cs.cmu.edu:9000"
+CLOUD_URL = "http://10.2.1.4:9000"
 CLOUD_CLOUDLET = "/api/gm/cloudlet/"
 CLOUD_SEGMENT = "/api/gm/segment/"
 GLOBAL_CLOUDLET_RESOURCE = "/api/gm/cloudlet/"
@@ -135,6 +135,7 @@ def filter_item(items):
 
 
 def update_to_cloud(cloudlet_url, filter_date):
+    cloudlet_url_local = "http://127.0.0.1:5000"
     global SEGMENT_RESOURCE
     global STREAM_RESOURCE
     global TAG_RESOURCE
@@ -160,9 +161,9 @@ def update_to_cloud(cloudlet_url, filter_date):
     tag_url = "%s?mod_time__gte=%s" % (TAG_RESOURCE, filter_date_string)
     stream_url = "%s?mod_time__gte=%s&status=FIN" % \
             (STREAM_RESOURCE, filter_date_string)
-    segment_resource = get_segment(cloudlet_url, segment_url)
 
     #1. update segment update
+    segment_resource = get_segment(cloudlet_url_local, segment_url)
     for segment_item in segment_resource:
         if cloud_seg_dic.get(segment_item['seg_id'], None) == None:
             # POST for new segment
@@ -174,7 +175,7 @@ def update_to_cloud(cloudlet_url, filter_date):
             ret_dict = put(CLOUD_URL, segment_resource_uri, segment_item)
 
     #2. update stream
-    stream_resource = get_files(cloudlet_url, stream_url)
+    stream_resource = get_files(cloudlet_url_local, stream_url)
     for stream_item in stream_resource:
         if cloud_seg_dic.get(stream_item['segment'], None) == None:
             # POST for new segment
@@ -186,7 +187,7 @@ def update_to_cloud(cloudlet_url, filter_date):
             ret_dict = put(CLOUD_URL, stream_resource_uri, filter_item(stream_item))
 
     #3. update tag
-    tag_resource = get_files(cloudlet_url, tag_url)
+    tag_resource = get_files(cloudlet_url_local, tag_url)
     # TODO: this will overwrite previous tag
     # if we try to read tags from global, tag will continuous become longer
     prev_tag_list = dict()
