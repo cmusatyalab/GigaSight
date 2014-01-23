@@ -1,0 +1,8 @@
+Need to solve
+- Weird extra segments registered on db with no actual data.
+- Indexer gets stuck at "<Capture 0x...>"
+- Cookigen: Search by tag
+
+Live with it for now
+- Some configuration are hard coded. 
+- Configuration files are scattered in every corner. Should centralize configuration with Reddis.
