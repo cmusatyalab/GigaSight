@@ -32,6 +32,8 @@ TAG_RESOURCE = "/api/dm/tag/"
 SEGMENT_RESOURCE = "/api/dm/segment/"
 
 CLOUD_URL = "http://10.2.1.4:9000"
+#TODO get CLOUD_URL from config.json
+
 CLOUD_CLOUDLET = "/api/gm/cloudlet/"
 CLOUD_SEGMENT = "/api/gm/segment/"
 GLOBAL_CLOUDLET_RESOURCE = "/api/gm/cloudlet/"
@@ -60,6 +62,7 @@ def get_files(cloudlet_url, resource_url):
             item['seg_id'] = resource_to_segid(item.get('segment'))
             item['segment'] = None
     conn.close()
+    print("Files got from local:\n\t %s" % response_list)
     return response_list
 
 
@@ -89,10 +92,11 @@ def get_segment(cloudlet_url, resource_url):
     response_list = json.loads(data).get('objects', list())
     #ret_dic = dict([(resource_to_segid(seg['seg_id']), seg)  for seg in response_list])
     conn.close()
+    print("Segments got from local:\n\t %s" % response_list)
     return response_list
 
 def post(global_url, resource_url, json_string):
-    print("Posting to %s%s" % (global_url, resource_url))
+    print("Posting to %s%s, json_string== %s" % (global_url, resource_url, json_string))
     end_point = urlparse("%s%s" % (global_url, resource_url))
 
     params = json.dumps(json_string)
@@ -126,6 +130,7 @@ def put(global_url, resource_url, json_string):
 
 def filter_item(items):
     ret_dict = dict()
+    # TODO Why are there two 'start_time's?'
     filter_key = ['seg_id', 'tag_list', 'start_time', 'length', 'location', \
             'start_time', 'cloudlet', 'mod_time']
     for key in items:
@@ -168,22 +173,30 @@ def update_to_cloud(cloudlet_url, filter_date):
         if cloud_seg_dic.get(segment_item['seg_id'], None) == None:
             # POST for new segment
             segment_item['cloudlet'] = cloudlet_resource_uri
+            print("Updating New Segment (post): %s" % segment_item)
             ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, segment_item)
         else:
+            # Wenlu: Update existing segments
             segment_resource_uri = cloud_seg_dic.get(segment_item['seg_id'])['resource_uri']
             segment_item['cloudlet'] = cloudlet_resource_uri
+            print("Updating Existing Segment (put): %s" % segment_item)
             ret_dict = put(CLOUD_URL, segment_resource_uri, segment_item)
 
     #2. update stream
     stream_resource = get_files(cloudlet_url_local, stream_url)
     for stream_item in stream_resource:
-        if cloud_seg_dic.get(stream_item['segment'], None) == None:
+        # Proposed bug fix by Wenlu, not confirmed by Kiryong yet 
+        # This might be the root of time confusion on global db
+        # if cloud_seg_dic.get(stream_item['segment'], None) == None:
+        if cloud_seg_dic.get(stream_item['seg_id'], None) == None:
             # POST for new segment
             stream_item['cloudlet'] = cloudlet_resource_uri
+            print("Updating New Stream (post): %s" % stream_item)
             ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, filter_item(stream_item))
         else:
             stream_resource_uri = cloud_seg_dic.get(stream_item['seg_id'])['resource_uri']
             stream_item['cloudlet'] = cloudlet_resource_uri
+            print("Updating Existing Stream (put): %s" % stream_item)
             ret_dict = put(CLOUD_URL, stream_resource_uri, filter_item(stream_item))
 
     #3. update tag
@@ -206,10 +219,12 @@ def update_to_cloud(cloudlet_url, filter_date):
         if cloud_seg_dic.get(tag_item['seg_id'], None) == None:
             # POST for new segment
             tag_item['cloudlet'] = cloudlet_resource_uri
+            print("Updating New Tags (post): %s" % tag_item)
             ret_dict = post(CLOUD_URL, CLOUD_SEGMENT, filter_item(tag_item))
         else:
             tag_resource_uri = cloud_seg_dic.get(tag_item['seg_id'])['resource_uri']
             tag_item['cloudlet'] = cloudlet_resource_uri
+            print("Updating Existing Tags (put): %s" % tag_item)
             ret_dict = put(CLOUD_URL, tag_resource_uri, filter_item(tag_item))
 
 
