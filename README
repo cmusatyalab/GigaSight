@@ -3,6 +3,3 @@ Copyright (C) 2011-2012 Carnegie Mellon University
 
 This is a developing project and some features might not be stable yet.
 Please visit our website at <http://elijah.cs.cmu.edu/>.
-
-The Indexer uses STF algrotihm to generate object tags. A brief description of the algortihm can be found in our paper.
-The STF code is not ready to be open yet. So in this directory, there are only scripts that leverage the STF library.
